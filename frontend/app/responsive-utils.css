@@ -1,0 +1,192 @@
+/* Responsive utility classes */
+
+/* Hide on mobile */
+.hide-mobile {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* Show only on mobile */
+.show-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .show-mobile {
+    display: block !important;
+  }
+}
+
+/* Responsive text sizes */
+.text-responsive-xs {
+  font-size: clamp(0.75rem, 1vw, 0.875rem);
+}
+
+.text-responsive-sm {
+  font-size: clamp(0.875rem, 1.2vw, 1rem);
+}
+
+.text-responsive-md {
+  font-size: clamp(1rem, 1.5vw, 1.125rem);
+}
+
+.text-responsive-lg {
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+}
+
+.text-responsive-xl {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+}
+
+/* Responsive spacing utilities */
+.p-responsive {
+  padding: clamp(12px, 2vw, 24px);
+}
+
+.px-responsive {
+  padding-left: clamp(12px, 2vw, 24px);
+  padding-right: clamp(12px, 2vw, 24px);
+}
+
+.py-responsive {
+  padding-top: clamp(12px, 2vw, 24px);
+  padding-bottom: clamp(12px, 2vw, 24px);
+}
+
+.m-responsive {
+  margin: clamp(12px, 2vw, 24px);
+}
+
+.mx-responsive {
+  margin-left: clamp(12px, 2vw, 24px);
+  margin-right: clamp(12px, 2vw, 24px);
+}
+
+.my-responsive {
+  margin-top: clamp(12px, 2vw, 24px);
+  margin-bottom: clamp(12px, 2vw, 24px);
+}
+
+/* Responsive gap utilities */
+.gap-responsive-sm {
+  gap: clamp(8px, 1vw, 12px);
+}
+
+.gap-responsive-md {
+  gap: clamp(12px, 1.5vw, 16px);
+}
+
+.gap-responsive-lg {
+  gap: clamp(16px, 2vw, 24px);
+}
+
+/* Responsive flex utilities */
+.flex-column-mobile {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .flex-column-mobile {
+    flex-direction: column;
+  }
+}
+
+/* Responsive grid utilities */
+.grid-responsive-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .grid-responsive-2 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.grid-responsive-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .grid-responsive-3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-responsive-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive container */
+.container-responsive {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (max-width: 768px) {
+  .container-responsive {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container-responsive {
+    padding: 0 12px;
+  }
+}
+
+/* Responsive overflow scroll */
+.overflow-scroll-mobile {
+  overflow: visible;
+}
+
+@media (max-width: 768px) {
+  .overflow-scroll-mobile {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Button responsive sizing */
+.btn-responsive {
+  padding: 10px 16px;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .btn-responsive {
+    padding: 12px;
+    font-size: 14px;
+    width: 100%;
+  }
+}
+
+/* Touch-friendly targets on mobile */
+@media (max-width: 768px) {
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px; /* iOS recommended touch target */
+  }
+
+  button,
+  a[role="button"] {
+    min-width: 44px;
+  }
+}

@@ -1,0 +1,244 @@
+/* ==============================================
+   SHARED STYLES - Estilos globales compartidos
+   ============================================== */
+
+/* ==============================================
+   BADGES - Estilos de badges/etiquetas
+   ============================================== */
+
+:root{
+  --naranja-corp: #ff6600;
+  --azul-corp: #00359a ;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Estados de badges */
+.badge-success {
+  background: #e8f6ef;
+  color: #1e7f4f;
+  border: 1px solid #bfe5cf;
+}
+
+.badge-danger {
+  background: #fdecea;
+  color: #c1382e;
+  border: 1px solid #f5c6c3;
+}
+
+.badge-warning {
+  background: #fff4e5;
+  color: #e67e22;
+  border: 1px solid #fdd8a8;
+}
+
+.badge-info {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+.badge-secondary {
+  background: #f5f5f5;
+  color: #757575;
+  border: 1px solid #e0e0e0;
+}
+
+.badge-muted {
+  background: #f5f5f5;
+  color: #9e9e9e;
+  border: 1px solid #e0e0e0;
+}
+
+/* Status badges (para reportes y proveedores) */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.status-badge.corriente {
+  background: #e8f6ef;
+  color: #1e7f4f;
+}
+
+.status-badge.vencido {
+  background: #fdecea;
+  color: #c1382e;
+}
+
+.status-badge.activo {
+  background: #e8f6ef;
+  color: #1e7f4f;
+}
+
+.status-badge.inactivo {
+  background: #f5f5f5;
+  color: #9e9e9e;
+}
+
+/* NIT badge */
+.nit-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #f5f5f5;
+  color: #616161;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: "Courier New", monospace;
+}
+
+/* ==============================================
+   ACTION BUTTONS - Botones de acción
+   ============================================== */
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+/* Estilos específicos de botones de acción */
+.edit-btn {
+  color: #4a90e2;
+}
+
+.edit-btn:hover {
+  background: #e8f2fc;
+  color: #2e6bb3;
+}
+
+.delete-btn {
+  color: #e74c3c;
+}
+
+.delete-btn:hover {
+  background: #fdecea;
+  color: #c1382e;
+}
+
+.activate-btn {
+  color: #27ae60;
+}
+
+.activate-btn:hover {
+  background: #e8f6ef;
+  color: #1e7f4f;
+}
+
+/* ==============================================
+   MONETARY - Valores monetarios
+   ============================================== */
+
+.monetary {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.monetary.strong {
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
+.valor-cell {
+  text-align: right;
+  font-weight: 500;
+  color: #2a2a2a;
+}
+
+/* ==============================================
+   TABLE UTILITIES - Utilidades para tablas
+   ============================================== */
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.clickable-row:hover {
+  background-color: #f9f9f9 !important;
+}
+
+.no-results {
+  text-align: center;
+  color: #9e9e9e;
+  font-style: italic;
+  padding: 32px !important;
+}
+
+/* ==============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================== */
+
+@media (max-width: 768px) {
+  .badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .action-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .action-buttons {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .status-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .action-btn {
+    width: 26px;
+    height: 26px;
+  }
+}

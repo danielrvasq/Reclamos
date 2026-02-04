@@ -1,0 +1,435 @@
+/* Copied styles from original Dashboard.css */
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.dashboard-sidebar {
+  width: 70px;
+  background: #f9f9f9;
+  color: #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #e5e5e5;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+  overflow: hidden;
+}
+
+.dashboard-sidebar:hover {
+  width: 260px;
+}
+
+.sidebar-header {
+  padding: 20px 16px;
+  border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.sidebar-logo {
+  font-size: 28px;
+  flex-shrink: 0;
+  color: #2a2a2a;
+}
+
+.sidebar-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2a2a2a;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dashboard-sidebar:hover .sidebar-title {
+  opacity: 1;
+}
+
+.sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.logout-button {
+  background: transparent;
+  color: #2a2a2a;
+  border: 1px solid #d0d0d0;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.logout-button:hover {
+  background: #efefef;
+  border-color: #c0c0c0;
+}
+
+.logout-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.logout-text {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dashboard-sidebar:hover .logout-text {
+  opacity: 1;
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 40px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9f9f9;
+}
+
+.dashboard-grid {
+  display: grid;
+  /* Desktop: 3 columns x 2 rows */
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 1.6vw, 24px);
+  width: 100%;
+  /* Allow scaling on large displays while keeping side breathing room */
+  max-width: min(1800px, 94vw);
+}
+
+/* Mobile: 2 columns x 3 rows */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    max-width: 100%;
+  }
+}
+
+.dashboard-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: clamp(18px, 1.6vw, 28px);
+  border: 1px solid #e5e5e5;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.dashboard-card:hover {
+  border-color: #d0d0d0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-card .card-icon {
+  transition: all 0.2s ease;
+}
+
+.dashboard-card:hover .card-icon {
+  color: var(--azul-corp);
+}
+
+.card-icon {
+  font-size: clamp(40px, 3.2vw, 56px);
+  color: var(--naranja-corp);
+}
+
+.dashboard-card h3 {
+  color: #2a2a2a;
+  font-size: clamp(16px, 1.4vw, 22px);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.dashboard-card p {
+  color: #6e6e6e;
+  font-size: clamp(12px, 1.1vw, 14px);
+  margin-bottom: clamp(12px, 1.4vw, 18px);
+  flex-grow: 1;
+  line-height: 1.5;
+}
+
+.card-button {
+  background: #ff6600;
+  color: #ffffff;
+  border: none;
+  padding: clamp(8px, 0.8vw, 12px) clamp(12px, 1.2vw, 16px);
+  border-radius: 8px;
+  font-size: clamp(12px, 1.1vw, 14px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-button:hover {
+  background: #00359a;
+}
+
+.card-button:active {
+  transform: scale(0.98);
+}
+
+/* Toast styles moved to App.css */
+
+/* New content wrapper for when Dashboard is inside Layout */
+.dashboard-content {
+  height: fit-content;
+  padding: clamp(24px, 3vw, 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+}
+
+.welcome-message {
+  text-align: center;
+  animation: fadeInDown 0.6s ease;
+  width: 100%;
+}
+
+.welcome-message h1 {
+  margin: 0 0 8px 0;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 700;
+  color: #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.welcome-message p {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  color: #6e6e6e;
+  font-weight: 400;
+}
+
+.wave-emoji {
+  display: inline-block;
+  animation: wave 2s ease-in-out infinite, colorChange 4s ease-in-out infinite;
+  transform-origin: 70% 70%;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes colorChange {
+  0%,
+  100% {
+    color: var(--naranja-corp);
+  }
+  50% {
+    color: var(--azul-corp);
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  10%,
+  30% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 16px;
+    padding-top: 24px;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    gap: 20px;
+  }
+
+  .welcome-message {
+    padding: 0 8px;
+  }
+
+  .welcome-message h1 {
+    font-size: 1.5rem;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .welcome-message p {
+    font-size: 0.9rem;
+  }
+
+  .wave-emoji {
+    font-size: 1.3rem;
+  }
+
+  .dashboard-card {
+    padding: 16px;
+  }
+
+  .card-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+  }
+
+  .dashboard-card h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .dashboard-card p {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .card-button {
+    padding: 10px 14px;
+    font-size: 13px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Sidebar adjustments for mobile */
+  .dashboard-sidebar {
+    width: 60px;
+  }
+
+  .dashboard-sidebar:hover {
+    width: 200px;
+  }
+
+  .sidebar-header {
+    padding: 16px 12px;
+  }
+
+  .sidebar-logo {
+    font-size: 24px;
+  }
+
+  .sidebar-title {
+    font-size: 20px;
+  }
+
+  .dashboard-main {
+    padding: 16px;
+  }
+
+  .logout-button {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  .dashboard-content {
+    padding: 12px;
+    padding-top: 20px;
+    gap: 16px;
+  }
+
+  .welcome-message h1 {
+    font-size: 1.3rem;
+  }
+
+  .welcome-message p {
+    font-size: 0.85rem;
+  }
+
+  .wave-emoji {
+    font-size: 1.2rem;
+  }
+
+  .dashboard-grid {
+    gap: 10px;
+  }
+
+  .dashboard-card {
+    padding: 14px;
+  }
+
+  .card-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+
+  .dashboard-card h3 {
+    font-size: 15px;
+  }
+
+  .dashboard-card p {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .card-button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .dashboard-sidebar {
+    width: 50px;
+  }
+
+  .dashboard-sidebar:hover {
+    width: 180px;
+  }
+
+  .sidebar-logo {
+    font-size: 20px;
+  }
+
+  .sidebar-title {
+    font-size: 18px;
+  }
+
+  .dashboard-main {
+    padding: 12px;
+  }
+}

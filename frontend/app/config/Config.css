@@ -1,0 +1,114 @@
+.config-content {
+  height: 100%;
+  padding: clamp(24px, 3vw, 30px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 32px;
+}
+
+.config-header {
+  width: 100%;
+}
+
+.config-header h2 {
+  margin: 0 0 8px 0;
+  font-size: clamp(1.75rem, 0.15rem, 2rem);
+  font-weight: 700;
+  color: #2a2a2a;
+}
+
+.config-header p {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  color: #6e6e6e;
+  font-weight: 400;
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(auto-fit, minmax(0, 1fr));
+  gap: clamp(12px, 1.6vw, 24px);
+  width: 100%;
+  max-width: min(1800px, 94vw);
+}
+
+@media (max-width: 768px) {
+  .config-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    max-width: 100%;
+  }
+}
+
+.config-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: clamp(18px, 1.6vw, 28px);
+  border: 1px solid #e5e5e5;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.config-card:hover {
+  border-color: #d0d0d0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.config-card .card-icon {
+  transition: all 0.2s ease;
+}
+
+.config-card:hover .card-icon {
+  color: var(--azul-corp);
+}
+
+.card-icon {
+  font-size: clamp(40px, 3.2vw, 56px);
+  color: var(--naranja-corp);
+}
+
+.config-card h3 {
+  color: #2a2a2a;
+  font-size: clamp(16px, 1.4vw, 22px);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.config-card p {
+  color: #6e6e6e;
+  font-size: clamp(12px, 1.1vw, 14px);
+  margin-bottom: clamp(12px, 1.4vw, 18px);
+  flex-grow: 1;
+  line-height: 1.5;
+}
+
+.card-button {
+  background: #ff6600;
+  color: #ffffff;
+  border: none;
+  padding: clamp(8px, 0.8vw, 12px) clamp(12px, 1.2vw, 16px);
+  border-radius: 8px;
+  font-size: clamp(12px, 1.1vw, 14px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-button:hover {
+  background: #00359a;
+}
+
+.card-button:active {
+  transform: scale(0.98);
+}

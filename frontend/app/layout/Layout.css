@@ -1,0 +1,391 @@
+.layout-container {
+  display: flex;
+  height: 100vh;
+  background: #ffffff;
+  overflow: hidden;
+  position: relative; /* Context for absolute sidebar */
+}
+
+.layout-sidebar {
+  width: 70px;
+  background: #e6f0ff;
+  color: #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #d0e3ff;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+  overflow: hidden;
+
+  /* Overlay positioning */
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  height: 100%;
+}
+
+.layout-sidebar:hover {
+  width: 260px;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1); /* Add shadow for overlay depth */
+}
+
+.sidebar-header {
+  padding: 20px 16px;
+  border-bottom: 1px solid #d0e3ff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.sidebar-logo {
+  height: 40px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.sidebar-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2a2a2a;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.layout-sidebar:hover .sidebar-title {
+  opacity: 1;
+}
+
+.sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid #d0e3ff;
+}
+
+.logout-button {
+  background: #ffc999;
+  color: #5f2701;
+  border: 1px solid #ffb380;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.logout-button:hover {
+  background: #ffb380;
+  border-color: #ff9f66;
+}
+
+.logout-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.logout-text {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.layout-sidebar:hover .logout-text {
+  opacity: 1;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 8px;
+  gap: 6px;
+}
+
+.nav-item {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #2a2a2a;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+  text-align: left;
+}
+
+.nav-item:hover {
+  background: #ffe4cc;
+}
+
+.nav-item.active {
+  background: #ffc999;
+  color: #5f2701;
+}
+
+.nav-icon {
+  font-size: 18px;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-text {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+}
+
+.layout-sidebar:hover .nav-text {
+  opacity: 1;
+}
+
+.layout-main {
+  flex: 1;
+  overflow: auto;
+  background: #f9f9f9;
+  margin-left: 70px; /* Space for the collapsed sidebar */
+  width: calc(100% - 70px); /* Ensure it takes remaining width properly */
+}
+
+/* Mobile menu toggle button - Hidden on desktop */
+.mobile-menu-toggle {
+  display: none;
+}
+
+/* Mobile menu overlay */
+.mobile-menu-overlay {
+  display: none;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .layout-container {
+    position: relative;
+  }
+
+  /* Mobile menu toggle button */
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1001;
+    width: 44px;
+    height: 44px;
+    background: #ff6600;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+
+  .mobile-menu-toggle svg {
+    pointer-events: none;
+  }
+
+  .mobile-menu-toggle:hover {
+    background: #e55a00;
+    transform: scale(1.05);
+  }
+
+  .mobile-menu-toggle:active {
+    transform: scale(0.95);
+  }
+
+  /* Overlay oscuro cuando el menú está abierto */
+  .mobile-menu-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Sidebar como panel lateral desplegable */
+  .layout-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    min-height: 100vh;
+    max-height: 100vh;
+    background: #f9f9f9;
+    border-right: 1px solid #e5e5e5;
+    flex-direction: column;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .layout-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .layout-sidebar:hover {
+    width: 280px;
+  }
+
+  .sidebar-header {
+    padding: 20px 16px;
+    border-bottom: 1px solid #e5e5e5;
+    border-right: none;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo {
+    height: 40px;
+  }
+
+  .sidebar-title {
+    font-size: 22px;
+    opacity: 1;
+  }
+
+  .sidebar-nav {
+    flex-direction: column;
+    flex: 1;
+    padding: 12px 8px;
+    gap: 6px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .nav-item {
+    padding: 12px 16px;
+    flex-shrink: 0;
+    width: 100%;
+  }
+
+  .nav-text {
+    opacity: 1;
+    font-size: 15px;
+  }
+
+  .nav-icon {
+    font-size: 20px;
+    width: 24px;
+  }
+
+  .sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid #e5e5e5;
+    border-left: none;
+    flex-shrink: 0;
+  }
+
+  .logout-button {
+    padding: 12px 16px;
+    font-size: 14px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .logout-text {
+    opacity: 1;
+  }
+
+  .logout-icon {
+    font-size: 18px;
+  }
+
+  .layout-main {
+    width: 100%;
+    margin-left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  .mobile-menu-toggle {
+    bottom: 16px;
+    right: 16px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .layout-sidebar {
+    width: 260px;
+  }
+
+  .sidebar-header {
+    padding: 18px 14px;
+  }
+
+  .sidebar-logo {
+    height: 50px;
+  }
+
+  .sidebar-title {
+    font-size: 20px;
+  }
+
+  .sidebar-nav {
+    padding: 10px 6px;
+    gap: 4px;
+  }
+
+  .nav-item {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .nav-text {
+    font-size: 14px;
+  }
+
+  .nav-icon {
+    font-size: 18px;
+    width: 22px;
+  }
+
+  .logout-button {
+    padding: 10px 14px;
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .logout-icon {
+    font-size: 16px;
+  }
+}

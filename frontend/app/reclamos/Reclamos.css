@@ -1,0 +1,457 @@
+.reclamos-page {
+  padding: 24px 32px;
+}
+
+.reclamos-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.reclamos-header h2 {
+  margin: 0;
+  color: #2a2a2a;
+  font-weight: 600;
+  font-size: 1.6rem;
+}
+
+.reclamos-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reclamos-actions .action.primary {
+  background: #ff6600;
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reclamos-actions .action.primary:hover {
+  background: var(--azul-corp);
+}
+
+.reclamos-actions .action.primary:active {
+  transform: scale(0.98);
+}
+
+.reclamos-actions .search {
+  padding: 8px 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  width: 220px;
+}
+
+.reclamos-table-section {
+  margin-bottom: 32px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.reclamos-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding: 14px 16px;
+  background: #f9f9f9;
+  border-bottom: 1px solid #e5e5e5;
+  transition: background 0.2s ease;
+}
+
+.reclamos-section-header:hover {
+  background: #f0f0f0;
+}
+
+.reclamos-section-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #2a2a2a;
+  font-weight: 600;
+}
+
+.collapse-icon {
+  color: #6e6e6e;
+  transition: transform 0.3s ease;
+}
+
+.collapse-icon.collapsed {
+  transform: rotate(-90deg);
+}
+
+.reclamos-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  background: #f9f9f9;
+  border-bottom: 1px solid #e5e5e5;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+.filter-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #4a4a4a;
+  background: #fff;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #ff6600;
+  box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.1);
+}
+
+.filter-select-wrap {
+  min-width: 150px;
+}
+
+.reclamos-table-wrap {
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  overflow: auto;
+  background: #fff;
+}
+
+.reclamos-table {
+  width: 100%;
+  min-width: 1100px;
+  border-collapse: collapse;
+}
+
+.reclamos-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f7f7f7;
+  text-align: left;
+  padding: 12px;
+  font-size: 13px;
+  color: #2a2a2a;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.reclamos-table tbody td {
+  padding: 12px;
+  font-size: 13px;
+  color: #4a4a4a;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+}
+
+.reclamos-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.reclamos-table tbody tr.clickable-row {
+  cursor: pointer;
+}
+
+.reclamos-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.reclamos-table tbody tr.clickable-row:hover {
+  background: #f0f7ff;
+}
+
+.monetary {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.reclamos-table thead th .th {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.reclamos-table thead th .th-icon {
+  color: #6e6e6e;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn {
+  background: none;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn.solution-btn {
+  color: #22c55e;
+  border-color: #22c55e;
+}
+
+.action-btn.solution-btn:hover {
+  background: #22c55e;
+  color: white;
+}
+
+.action-btn.avance-btn {
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.action-btn.avance-btn:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+.action-btn.edit-btn {
+  color: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.action-btn.edit-btn:hover {
+  background: #f59e0b;
+  color: white;
+}
+
+.action-btn.delete-btn {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.action-btn.delete-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.action-btn.approve-btn {
+  color: #10b981;
+  border-color: #10b981;
+}
+
+.action-btn.approve-btn:hover {
+  background: #10b981;
+  color: white;
+}
+
+.action-btn.reject-btn {
+  color: #f97316;
+  border-color: #f97316;
+}
+
+.action-btn.reject-btn:hover {
+  background: #f97316;
+  color: white;
+}
+
+.action-btn.observaciones-btn {
+  color: #8b5cf6;
+  border-color: #8b5cf6;
+}
+
+.action-btn.observaciones-btn:hover {
+  background: #8b5cf6;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .reclamos-page {
+    padding: 16px;
+  }
+
+  .reclamos-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .reclamos-header h2 {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .reclamos-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .reclamos-actions .search {
+    width: 100%;
+  }
+
+  .reclamos-actions .action.primary {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 12px;
+  }
+
+  .reclamos-filters {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filter-input {
+    min-width: 100%;
+  }
+
+  .filter-select-wrap {
+    min-width: 100%;
+  }
+
+  .reclamos-table-wrap {
+    border-radius: 8px;
+  }
+
+  .reclamos-table {
+    min-width: 800px;
+    font-size: 12px;
+  }
+
+  .reclamos-table thead th {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .reclamos-table tbody td {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .action-buttons {
+    gap: 6px;
+  }
+}
+
+/* React Select custom styling */
+.react-select__control {
+  border: 1px solid #d0d0d0 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  min-height: 36px !important;
+  font-size: 13px !important;
+}
+
+.react-select__control:hover {
+  border-color: #ff6600 !important;
+}
+
+.react-select__control--is-focused {
+  border-color: #ff6600 !important;
+  box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.1) !important;
+}
+
+.react-select__menu {
+  border: 1px solid #d0d0d0 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  background: #fff !important;
+  z-index: 10;
+}
+
+.react-select__menu-list {
+  padding: 4px 0 !important;
+}
+
+.react-select__option {
+  padding: 8px 12px !important;
+  font-size: 13px !important;
+  color: #4a4a4a !important;
+  cursor: pointer !important;
+  transition: background 0.2s ease !important;
+}
+
+.react-select__option:hover {
+  background: #f0f0f0 !important;
+  color: #2a2a2a !important;
+}
+
+.react-select__option--is-selected {
+  background: #ff6600 !important;
+  color: #fff !important;
+}
+
+.react-select__option--is-focused {
+  background: #ffe6cc !important;
+  color: #2a2a2a !important;
+}
+
+.react-select__single-value {
+  color: #4a4a4a !important;
+  font-size: 13px !important;
+}
+
+.react-select__placeholder {
+  color: #9a9a9a !important;
+  font-size: 13px !important;
+}
+
+.react-select__indicator-separator {
+  background: transparent !important;
+}
+
+.react-select__dropdown-indicator {
+  color: #6e6e6e !important;
+}
+
+@media (max-width: 480px) {
+  .reclamos-page {
+    padding: 12px;
+  }
+
+  .reclamos-header h2 {
+    font-size: 18px;
+  }
+
+  .reclamos-table {
+    min-width: 700px;
+    font-size: 11px;
+  }
+
+  .reclamos-table thead th {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  .reclamos-table tbody td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+}

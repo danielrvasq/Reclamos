@@ -1,0 +1,159 @@
+.matrix-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.matrix-form-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  width: min(720px, 100%);
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+.matrix-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eaeaea;
+  gap: 12px;
+}
+
+.matrix-form-header h3 {
+  margin: 0;
+  color: #1f1f1f;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.matrix-form-subtitle {
+  margin: 0 0 4px 0;
+  color: #6a6a6a;
+  font-size: 13px;
+}
+
+.matrix-form-header .close {
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.matrix-form-header .close:hover {
+  background: #f5f5f5;
+}
+
+.matrix-form-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.matrix-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.matrix-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #2f2f2f;
+}
+
+.matrix-form-grid input[type="text"],
+.matrix-form-grid input[type="number"],
+.matrix-form-grid input[type="email"],
+.matrix-form-grid select {
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.matrix-form-grid input:focus,
+.matrix-form-grid select:focus {
+  outline: none;
+  border-color: #ff6600;
+  box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.15);
+}
+
+.matrix-form-grid label.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.matrix-form-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.matrix-form-actions .secondary,
+.matrix-form-actions .primary {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.matrix-form-actions .secondary {
+  background: #f3f3f3;
+  color: #333333;
+  border: 1px solid #e0e0e0;
+}
+
+.matrix-form-actions .secondary:hover {
+  background: #e8e8e8;
+}
+
+.matrix-form-actions .primary {
+  background: #ff6600;
+  color: #ffffff;
+}
+
+.matrix-form-actions .primary:hover {
+  background: #e55a00;
+}
+
+.matrix-form-actions button:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 520px) {
+  .matrix-form-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .matrix-form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .matrix-form-actions .secondary,
+  .matrix-form-actions .primary {
+    width: 100%;
+    text-align: center;
+  }
+}

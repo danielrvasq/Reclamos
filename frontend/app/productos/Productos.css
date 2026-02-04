@@ -1,0 +1,276 @@
+.products-page {
+  padding: 24px 32px;
+}
+
+.products-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.products-header h2 {
+  margin: 0;
+  color: #2a2a2a;
+  font-weight: 600;
+  font-size: 1.6rem;
+}
+
+.products-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.products-actions .action.primary {
+  background: var(--naranja-corp);
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.products-actions .action.primary:hover {
+  background: var(--azul-corp);
+}
+
+.products-actions .action.primary:active {
+  transform: scale(0.98);
+}
+
+.products-actions .search {
+  padding: 8px 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  width: 220px;
+}
+
+.products-table-wrap {
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  overflow: auto;
+  background: #fff;
+}
+
+.products-table {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 15px;
+}
+
+.products-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f7f7f7;
+  text-align: left;
+  padding: 12px;
+  font-size: 13px;
+  color: #2a2a2a;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.products-table tbody td {
+  padding: 12px;
+  font-size: 13px;
+  color: #4a4a4a;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.products-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.products-table .badge {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+}
+
+.products-table .action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.products-table .action-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: #444;
+}
+
+.products-table .action-btn.edit-btn:hover {
+  background: #eaf3ff;
+  color: #2176c1;
+}
+
+.products-table .action-btn.delete-btn:hover {
+  background: #ffeaea;
+  color: #e74c3c;
+}
+
+.products-table .action-btn.activate-btn:hover {
+  background: #e6fff2;
+  color: #1b9c54;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.tag-cemento {
+  background: #e6f4ff;
+  color: #1d5fbf;
+  border-color: #bae0ff;
+}
+
+.tag-acabados {
+  background: #fff7e6;
+  color: #ad6800;
+  border-color: #ffe7ba;
+}
+
+.products-table-wrap.inactive tbody tr {
+  background: #fcfcfc;
+}
+
+.products-table-wrap.inactive h3 {
+  margin: 18px 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #444;
+}
+
+h3 {
+  margin: 16px 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
+@media (max-width: 768px) {
+  .products-page {
+    padding: 16px;
+  }
+
+  .products-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .products-header h2 {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .products-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .products-actions .search {
+    width: 100%;
+  }
+
+  .products-actions .action.primary {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 12px;
+  }
+
+  .products-table-wrap {
+    border-radius: 8px;
+  }
+
+  .products-table {
+    min-width: 800px;
+    font-size: 12px;
+  }
+
+  .products-table thead th {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .products-table tbody td {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .action-buttons {
+    gap: 6px;
+  }
+
+  .action-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-page {
+    padding: 12px;
+  }
+
+  .products-header h2 {
+    font-size: 18px;
+  }
+
+  .products-table {
+    min-width: 680px;
+    font-size: 11px;
+  }
+
+  .products-table thead th {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  .products-table tbody td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  .action-btn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .tag {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+}

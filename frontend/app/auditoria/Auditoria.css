@@ -1,0 +1,126 @@
+.auditoria-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+.auditoria-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.auditoria-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #1f2937;
+}
+
+.auditoria-header p {
+  margin: 4px 0 0;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.auditoria-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.auditoria-search {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  min-width: 240px;
+  font-size: 14px;
+}
+
+.auditoria-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--naranja-corp);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.auditoria-refresh:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auditoria-refresh:hover:not(:disabled) {
+  background: var(--azul-corp);
+}
+
+.auditoria-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+}
+
+.auditoria-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.auditoria-loading {
+  padding: 20px;
+  text-align: center;
+  color: #4b5563;
+}
+
+.auditoria-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.auditoria-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.auditoria-table th,
+.auditoria-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.auditoria-table th {
+  background: #f9fafb;
+  color: #111827;
+  font-weight: 700;
+}
+
+.auditoria-table tr:hover td {
+  background: #f3f4f6;
+}
+
+@media (max-width: 768px) {
+  .auditoria-page {
+    padding: 12px;
+  }
+
+  .auditoria-search {
+    min-width: 200px;
+  }
+}

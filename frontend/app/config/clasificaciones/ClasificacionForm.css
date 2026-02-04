@@ -1,0 +1,127 @@
+.clsf-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.clsf-modal {
+  background: #fff;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.clsf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #f9f9f9;
+}
+
+.clsf-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
+.clsf-close {
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.clsf-close:hover {
+  background: #e5e5e5;
+}
+
+.clsf-body {
+  padding: 20px;
+}
+
+.clsf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.clsf-field span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2a2a2a;
+}
+
+.clsf-field input {
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.clsf-field input:focus {
+  border-color: var(--naranja-corp);
+}
+
+.clsf-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.clsf-footer .btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clsf-footer .btn.ghost {
+  background: transparent;
+  color: #666;
+  border: 1px solid #d0d0d0;
+}
+
+.clsf-footer .btn.ghost:hover {
+  background: #f5f5f5;
+}
+
+.clsf-footer .btn.primary {
+  background: var(--naranja-corp);
+  color: #fff;
+}
+
+.clsf-footer .btn.primary:hover {
+  background: #e55a00;
+}
