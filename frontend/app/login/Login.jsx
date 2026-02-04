@@ -1,9 +1,11 @@
 "use client";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import "./Login.css";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 function Login() {
   const navigate = useNavigate();
@@ -50,6 +52,47 @@ function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE}/auth/google-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token: credentialResponse.credential,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Error al iniciar sesión con Google");
+        setLoading(false);
+        return;
+      }
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("usuario", JSON.stringify(data.usuario));
+        navigate("/dashboard");
+      } else {
+        setError("No se recibió token de autenticación");
+      }
+    } catch (error) {
+      console.error("Error en Google Login:", error);
+      setError("Error de conexión con el servidor.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Error al conectar con Google");
   };
 
   return (
@@ -104,14 +147,29 @@ function Login() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="login-button"
-            disabled={loading}
-          >
+          <button type="submit" className="login-button" disabled={loading}>
             {loading ? "Iniciando..." : "Iniciar Sesión"}
           </button>
         </form>
+
+        <div className="google-login-container" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div className="separator" style={{ margin: '15px 0', width: '100%', textAlign: 'center', borderBottom: '1px solid #ddd', lineHeight: '0.1em' }}>
+                <span style={{ background: '#fff', padding: '0 10px', color: '#777' }}>O</span>
+            </div>
+            {GOOGLE_CLIENT_ID ? (
+                <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                    <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        theme="outline"
+                        size="large"
+                        width="100%"
+                    />
+                </GoogleOAuthProvider>
+            ) : (
+                <p style={{ color: 'red', fontSize: '12px' }}>Google Client ID no configurado</p>
+            )}
+        </div>
 
         <div className="login-footer">
           <a href="#" className="forgot-password">

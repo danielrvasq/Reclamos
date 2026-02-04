@@ -118,7 +118,6 @@ function Auditoria() {
                 <tr>
                   <th>Fecha</th>
                   <th>Usuario</th>
-                  <th>Acción</th>
                   <th>Observación</th>
                   <th>Reclamo</th>
                 </tr>
@@ -135,7 +134,6 @@ function Auditoria() {
                     <tr key={log.id}>
                       <td>{fmtFecha(log.fecha)}</td>
                       <td>{usuariosMap.get(log.usuario_id) || "—"}</td>
-                      <td>{log.accion || "—"}</td>
                       <td>{log.observacion || "—"}</td>
                       <td>
                         {log.formulario_id ? `#${log.formulario_id}` : "—"}

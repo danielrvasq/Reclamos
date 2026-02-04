@@ -27,13 +27,27 @@ export default function ProtectedRoute({ children }) {
       console.log("DEBUG ProtectedRoute:", {
         usuarioCompleto: usuario,
         rolDetectado: rol,
+        rolOriginal: usuario.rol,
+        rolNombre: usuario.rol_nombre,
         currentPath,
         tieneAcceso: hasAccess(rol, currentPath),
       });
 
       if (!hasAccess(rol, currentPath)) {
         // Usuario no tiene permiso para esta ruta
-        console.warn(`Usuario con rol ${rol} intenta acceder a ${currentPath}`);
+        console.warn(
+          `Usuario con rol "${rol}" intenta acceder a ${currentPath}`
+        );
+
+        // Si ya está intentando acceder a dashboard y no tiene permiso, ir a una ruta de error
+        if (currentPath === "/dashboard") {
+          console.error("Usuario sin permisos para dashboard, cerrando sesión");
+          localStorage.removeItem("token");
+          localStorage.removeItem("usuario");
+          navigate("/", { replace: true });
+          return;
+        }
+
         // Redirigir a dashboard (página por defecto)
         navigate("/dashboard", { replace: true });
         return;

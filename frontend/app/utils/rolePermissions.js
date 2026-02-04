@@ -12,9 +12,11 @@ const ROLE_PERMISSIONS = {
     "/auditoria",
   ],
   reclamos: ["/dashboard", "/reclamos", "/reportes"],
+  "Lider Reclamos": ["/dashboard", "/reclamos", "/reportes", "/auditoria"],
   "lider Reclamos": ["/dashboard", "/reclamos", "/reportes", "/auditoria"],
+  "lider reclamos": ["/dashboard", "/reclamos", "/reportes", "/auditoria"],
   colaborador: ["/dashboard", "/reclamos", "/reportes"],
-  auditor: ["/dashboard", "/reclamos", "/reportes"],
+  auditor: ["/dashboard", "/reclamos", "/reportes", "/auditoria"],
 };
 
 export const getPermittedRoutes = (rol) => {
@@ -43,7 +45,11 @@ export const isAuditor = (rol) => {
 };
 
 export const isLiderReclamos = (rol) => {
-  return rol === "lider Reclamos";
+  return (
+    rol === "Lider Reclamos" ||
+    rol === "lider Reclamos" ||
+    rol === "lider reclamos"
+  );
 };
 
 export const isReadOnlyRole = (rol) => {
@@ -51,5 +57,10 @@ export const isReadOnlyRole = (rol) => {
 };
 
 export const canApproveReclaims = (rol) => {
-  return rol === "administrador" || rol === "lider Reclamos";
+  return (
+    rol === "administrador" ||
+    rol === "Lider Reclamos" ||
+    rol === "lider Reclamos" ||
+    rol === "lider reclamos"
+  );
 };
