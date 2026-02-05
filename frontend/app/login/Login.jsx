@@ -42,7 +42,11 @@ function Login() {
       if (data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("usuario", JSON.stringify(data.usuario));
-        navigate("/dashboard");
+        if (data.usuario?.force_password_change) {
+          navigate("/cambiar-contrasena");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         setError("No se recibió token de autenticación");
       }
@@ -79,7 +83,11 @@ function Login() {
       if (data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("usuario", JSON.stringify(data.usuario));
-        navigate("/dashboard");
+        if (data.usuario?.force_password_change) {
+          navigate("/cambiar-contrasena");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         setError("No se recibió token de autenticación");
       }
@@ -152,29 +160,46 @@ function Login() {
           </button>
         </form>
 
-        <div className="google-login-container" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div className="separator" style={{ margin: '15px 0', width: '100%', textAlign: 'center', borderBottom: '1px solid #ddd', lineHeight: '0.1em' }}>
-                <span style={{ background: '#fff', padding: '0 10px', color: '#777' }}>O</span>
-            </div>
-            {GOOGLE_CLIENT_ID ? (
-                <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-                    <GoogleLogin
-                        onSuccess={handleGoogleSuccess}
-                        onError={handleGoogleError}
-                        theme="outline"
-                        size="large"
-                        width="100%"
-                    />
-                </GoogleOAuthProvider>
-            ) : (
-                <p style={{ color: 'red', fontSize: '12px' }}>Google Client ID no configurado</p>
-            )}
-        </div>
-
-        <div className="login-footer">
-          <a href="#" className="forgot-password">
-            ¿Olvidaste tu contraseña?
-          </a>
+        <div
+          className="google-login-container"
+          style={{
+            marginTop: "20px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <div
+            className="separator"
+            style={{
+              margin: "15px 0",
+              width: "100%",
+              textAlign: "center",
+              borderBottom: "1px solid #ddd",
+              lineHeight: "0.1em",
+            }}
+          >
+            <span
+              style={{ background: "#fff", padding: "0 10px", color: "#777" }}
+            >
+              O
+            </span>
+          </div>
+          {GOOGLE_CLIENT_ID ? (
+            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                theme="outline"
+                size="large"
+                width="100%"
+              />
+            </GoogleOAuthProvider>
+          ) : (
+            <p style={{ color: "red", fontSize: "12px" }}>
+              Google Client ID no configurado
+            </p>
+          )}
         </div>
       </div>
     </div>

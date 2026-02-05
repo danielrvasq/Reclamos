@@ -101,8 +101,13 @@ class UsuariosController {
       }
 
       let passwordHash;
+      let forcePasswordChange;
       if (password) {
         passwordHash = await bcrypt.hash(password, 10);
+        const roles = (req.usuario?.roles || []).map((r) => r.toLowerCase());
+        const isAdmin = roles.includes("administrador");
+        const isSelf = parseInt(req.usuario?.id, 10) === parseInt(id, 10);
+        forcePasswordChange = isAdmin && !isSelf ? true : false;
       }
 
       const updatedUser = await UsuariosModel.updateUser(id, {
@@ -112,6 +117,7 @@ class UsuariosController {
         passwordHash,
         proveedor_auth,
         area_id,
+        force_password_change: forcePasswordChange,
         activo: activo !== undefined ? activo : userExists.activo,
       });
 
@@ -139,6 +145,54 @@ class UsuariosController {
 
       const result = await UsuariosModel.deleteUser(id);
       res.json({ status: "success", message: result.message });
+    } catch (err) {
+      res.status(500).json({ status: "error", message: err.message });
+    }
+  }
+
+  // PUT: cambiar contraseña del usuario (self o admin)
+  static async changePassword(req, res) {
+    try {
+      const { id } = req.params;
+      const { password } = req.body;
+
+      if (!password) {
+        return res.status(400).json({
+          status: "error",
+          message: "password es requerido",
+        });
+      }
+
+      const userExists = await UsuariosModel.getUserById(id);
+      if (!userExists) {
+        return res
+          .status(404)
+          .json({ status: "error", message: "Usuario no encontrado" });
+      }
+
+      const roles = (req.usuario?.roles || []).map((r) => r.toLowerCase());
+      const isAdmin = roles.includes("administrador");
+      const isSelf = parseInt(req.usuario?.id, 10) === parseInt(id, 10);
+
+      if (!isAdmin && !isSelf) {
+        return res.status(403).json({
+          status: "error",
+          message: "No tienes permisos para cambiar esta contraseña",
+        });
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+      const updatedUser = await UsuariosModel.updatePassword(
+        id,
+        passwordHash,
+        false
+      );
+
+      res.json({
+        status: "success",
+        message: "Contraseña actualizada correctamente",
+        data: updatedUser,
+      });
     } catch (err) {
       res.status(500).json({ status: "error", message: err.message });
     }

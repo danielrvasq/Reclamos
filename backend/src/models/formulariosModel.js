@@ -16,8 +16,9 @@ class FormulariosModel {
                 no_justificado, clasificacion_id, clase_id, causa_id,
                 observaciones_primer_contacto, avance_proceso_responsable,
                   ccpa, solucion_final, dias_habiles_demora,
-                  fecha_cierre_definitiva, observaciones, creado_por, created_at
+            fecha_cierre_definitiva, observaciones, creado_por, activo, created_at
          FROM reclamos
+         WHERE activo = 1
          ORDER BY id DESC`
       );
       return result.recordset;
@@ -43,7 +44,7 @@ class FormulariosModel {
                   no_justificado, clasificacion_id, clase_id, causa_id,
                   observaciones_primer_contacto, avance_proceso_responsable,
                       ccpa, solucion_final, dias_habiles_demora,
-                      fecha_cierre_definitiva, observaciones, creado_por, created_at
+                  fecha_cierre_definitiva, observaciones, creado_por, activo, created_at
            FROM reclamos
            WHERE id = @id`
         );
@@ -519,8 +520,8 @@ class FormulariosModel {
       await pool
         .request()
         .input("id", sql.Int, id)
-        .query("DELETE FROM reclamos WHERE id = @id");
-      return { message: "Reclamo eliminado correctamente" };
+        .query("UPDATE reclamos SET activo = 0 WHERE id = @id");
+      return { message: "Reclamo inactivado correctamente" };
     } catch (err) {
       throw new Error(`Error al eliminar reclamo: ${err.message}`);
     }

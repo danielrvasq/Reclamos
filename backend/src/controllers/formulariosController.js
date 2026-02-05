@@ -75,8 +75,8 @@ class FormulariosController {
 
         if (matriz) {
           // Asignar primer_contacto_id como persona_responsable para estado Primer contacto (6)
-          if (matriz.primer_contacto_id) {
-            persona_responsable = matriz.primer_contacto_id;
+          if (matriz.primer_contacto_ids?.length) {
+            persona_responsable = matriz.primer_contacto_ids[0];
           }
         }
       }
@@ -187,6 +187,23 @@ class FormulariosController {
           return res
             .status(404)
             .json({ status: "error", message: "Formulario no encontrado" });
+
+        if (body.solucion_final !== undefined) {
+          const roles = req.usuario?.roles || [];
+          const esAdminOLider =
+            roles.includes("administrador") || roles.includes("lider Reclamos");
+          const esResponsableTratamiento =
+            parseInt(exists.persona_responsable, 10) ===
+            parseInt(req.usuario?.id, 10);
+
+          if (!esAdminOLider && !esResponsableTratamiento) {
+            return res.status(403).json({
+              status: "error",
+              message:
+                "No tienes permisos para registrar la solución final de este reclamo",
+            });
+          }
+        }
 
         const updateData = {};
         if (body.avance_proceso_responsable !== undefined) {
@@ -459,6 +476,34 @@ class FormulariosController {
         status: "success",
         message: "Reclamo rechazado, vuelve a tratamiento",
         data: updated,
+      });
+    } catch (err) {
+      res.status(500).json({ status: "error", message: err.message });
+    }
+  }
+
+  static async delete(req, res) {
+    try {
+      const { id } = req.params;
+
+      const exists = await FormulariosModel.getById(id);
+      if (!exists)
+        return res
+          .status(404)
+          .json({ status: "error", message: "Reclamo no encontrado" });
+
+      await FormulariosModel.delete(id);
+
+      await FormulariosController.registrarAccion({
+        formularioId: id,
+        usuarioId: req.usuario?.id || null,
+        accion: "ELIMINAR_RECLAMO",
+        observacion: "Reclamo eliminado",
+      });
+
+      res.json({
+        status: "success",
+        message: "Reclamo inactivado correctamente",
       });
     } catch (err) {
       res.status(500).json({ status: "error", message: err.message });

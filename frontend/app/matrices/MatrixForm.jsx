@@ -18,10 +18,9 @@ function MatrixForm({
     clasificacion_id: "",
     clase_id: "",
     causa_id: "",
-    primer_contacto_id: "",
+    primer_contacto_ids: [],
     tiempo_atencion_inicial_dias: "",
     responsable_tratamiento_id: "",
-    correo_responsable: "",
     tiempo_respuesta_dias: "",
     tipo_respuesta: "",
     activo: true,
@@ -31,27 +30,37 @@ function MatrixForm({
   const [clases, setClases] = useState(clasesProp);
   const [causas, setCausas] = useState(causasProp);
   const [usuarios, setUsuarios] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [primerContactoSeleccionado, setPrimerContactoSeleccionado] =
+    useState("");
 
   useEffect(() => {
     fetchUsers();
+    fetchAreas();
   }, []);
 
   useEffect(() => {
     if (initialData) {
+      const primerContactos = Array.isArray(initialData.primer_contacto_ids)
+        ? initialData.primer_contacto_ids
+        : initialData.primer_contacto_id
+        ? [initialData.primer_contacto_id]
+        : [];
+
       setFormData({
         clasificacion_id: initialData.clasificacion_id || "",
         clase_id: initialData.clase_id || "",
         causa_id: initialData.causa_id || "",
-        primer_contacto_id: initialData.primer_contacto_id || "",
+        primer_contacto_ids: primerContactos.map(String),
         tiempo_atencion_inicial_dias:
           initialData.tiempo_atencion_inicial_dias || "",
         responsable_tratamiento_id:
           initialData.responsable_tratamiento_id || "",
-        correo_responsable: initialData.correo_responsable || "",
         tiempo_respuesta_dias: initialData.tiempo_respuesta_dias || "",
         tipo_respuesta: initialData.tipo_respuesta || "",
         activo: initialData.activo !== undefined ? initialData.activo : true,
       });
+      setPrimerContactoSeleccionado("");
     }
   }, [initialData]);
 
@@ -64,6 +73,26 @@ function MatrixForm({
       console.error("Error cargando usuarios:", error);
     }
   };
+
+  const fetchAreas = async () => {
+    try {
+      const res = await authFetch(`${API_BASE}/area`);
+      const json = await res.json();
+      if (res.ok) setAreas(json.data || []);
+    } catch (error) {
+      console.error("Error cargando áreas:", error);
+    }
+  };
+
+  const areaReclamosId = useMemo(() => {
+    const area = areas.find((a) => a.nombre?.toLowerCase() === "reclamos");
+    return area?.id || null;
+  }, [areas]);
+
+  const usuariosReclamos = useMemo(() => {
+    if (!areaReclamosId) return [];
+    return usuarios.filter((u) => u.area === areaReclamosId);
+  }, [usuarios, areaReclamosId]);
 
   const filteredClases = useMemo(() => {
     const id = parseInt(formData.clasificacion_id);
@@ -80,6 +109,32 @@ function MatrixForm({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAgregarPrimerContacto = () => {
+    if (!primerContactoSeleccionado) return;
+    setFormData((prev) => {
+      if (prev.primer_contacto_ids.includes(primerContactoSeleccionado)) {
+        return prev;
+      }
+      return {
+        ...prev,
+        primer_contacto_ids: [
+          ...prev.primer_contacto_ids,
+          primerContactoSeleccionado,
+        ],
+      };
+    });
+    setPrimerContactoSeleccionado("");
+  };
+
+  const handleQuitarPrimerContacto = (id) => {
+    setFormData((prev) => ({
+      ...prev,
+      primer_contacto_ids: prev.primer_contacto_ids.filter(
+        (item) => item !== id
+      ),
+    }));
   };
 
   // Mantener sincronía de campos derivados
@@ -107,20 +162,26 @@ function MatrixForm({
     return Number.isNaN(n) ? null : n;
   };
 
+  const toIntArray = (values) => {
+    if (!Array.isArray(values)) return [];
+    return values
+      .map((v) => parseInt(v, 10))
+      .filter((v) => Number.isInteger(v));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const payload = {
       clasificacion_id: toIntOrNull(formData.clasificacion_id),
       clase_id: toIntOrNull(formData.clase_id),
       causa_id: toIntOrNull(formData.causa_id),
-      primer_contacto_id: toIntOrNull(formData.primer_contacto_id),
+      primer_contacto_ids: toIntArray(formData.primer_contacto_ids),
       tiempo_atencion_inicial_dias: toIntOrNull(
         formData.tiempo_atencion_inicial_dias
       ),
       responsable_tratamiento_id: toIntOrNull(
         formData.responsable_tratamiento_id
       ),
-      correo_responsable: formData.correo_responsable || null,
       tiempo_respuesta_dias: toIntOrNull(formData.tiempo_respuesta_dias),
       tipo_respuesta: formData.tipo_respuesta || null,
       activo: !!formData.activo,
@@ -211,18 +272,52 @@ function MatrixForm({
 
             <label>
               <span>Responsable primer contacto</span>
-              <select
-                name="primer_contacto_id"
-                value={formData.primer_contacto_id}
-                onChange={handleChange}
-              >
-                <option value="">Seleccione</option>
-                {usuarios.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.nombre}
-                  </option>
-                ))}
-              </select>
+              <div className="primer-contacto-picker">
+                <select
+                  name="primer_contacto_select"
+                  value={primerContactoSeleccionado}
+                  onChange={(e) =>
+                    setPrimerContactoSeleccionado(e.target.value)
+                  }
+                >
+                  <option value="">Seleccione</option>
+                  {usuariosReclamos.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.nombre}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="add-btn"
+                  onClick={handleAgregarPrimerContacto}
+                  disabled={!primerContactoSeleccionado}
+                >
+                  Añadir
+                </button>
+              </div>
+
+              {formData.primer_contacto_ids.length === 0 ? (
+                <span className="muted">Sin responsables agregados</span>
+              ) : (
+                <ul className="selected-list">
+                  {formData.primer_contacto_ids.map((id) => (
+                    <li key={id}>
+                      <span>
+                        {usuariosReclamos.find((u) => String(u.id) === id)
+                          ?.nombre || `ID: ${id}`}
+                      </span>
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() => handleQuitarPrimerContacto(id)}
+                      >
+                        Quitar
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </label>
 
             <label>
@@ -250,17 +345,6 @@ function MatrixForm({
                   </option>
                 ))}
               </select>
-            </label>
-
-            <label>
-              <span>Correo responsable</span>
-              <input
-                type="email"
-                name="correo_responsable"
-                value={formData.correo_responsable}
-                onChange={handleChange}
-                placeholder="correo@dominio.com"
-              />
             </label>
 
             <label>

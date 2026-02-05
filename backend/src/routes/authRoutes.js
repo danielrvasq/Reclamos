@@ -31,7 +31,8 @@ router.post("/login", async (req, res) => {
       .request()
       .input("username", sql.NVarChar(255), username)
       .query(
-        `SELECT u.id, u.nombre, u.username, u.password_hash, u.activo, u.area, u.proveedor_auth
+        `SELECT u.id, u.nombre, u.username, u.password_hash, u.activo, u.area, u.proveedor_auth,
+          u.force_password_change
          FROM usuarios u
          WHERE u.username = @username`
       );
@@ -99,6 +100,7 @@ router.post("/login", async (req, res) => {
         nombre: usuario.nombre,
         username: usuario.username,
         area: usuario.area,
+        force_password_change: !!usuario.force_password_change,
         rol_nombre: rolPrincipal,
         roles: roles,
       },
@@ -116,7 +118,6 @@ router.post("/login", async (req, res) => {
 router.get("/test", (req, res) => {
   res.json({ message: "Auth routes activas" });
 });
-
 
 // POST /api/auth/google-login
 router.post("/google-login", async (req, res) => {
@@ -143,7 +144,8 @@ router.post("/google-login", async (req, res) => {
       .request()
       .input("email", sql.NVarChar(255), email)
       .query(
-        `SELECT u.id, u.nombre, u.username, u.activo, u.area, u.proveedor_auth
+        `SELECT u.id, u.nombre, u.username, u.activo, u.area, u.proveedor_auth,
+          u.force_password_change
          FROM usuarios u
          WHERE u.correo = @email`
       );
@@ -151,44 +153,44 @@ router.post("/google-login", async (req, res) => {
     let usuario = userResult.recordset[0];
 
     if (!usuario) {
-        // Auto-registro
-        try {
-            console.log("Usuario no existe, creando nuevo usuario con Google...");
-            const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
-            const passwordHash = await bcryptjs.hash(randomPassword, 10);
-            
-            // Usar la parte local del correo como username (asegurar unicidad podría requerir más lógica, por ahora simple)
-            let newUsername = email.split('@')[0];
-            
-            // Verificar si el username ya existe (caso raro donde correo es diferente pero username igual)
-            // Por simplicidad en este paso, asumimos que email es único y username derivado también.
-            // Si choca, fallará la creación (depende de constraints), pero google emails son únicos.
+      // Auto-registro
+      try {
+        const randomPassword =
+          Math.random().toString(36).slice(-8) +
+          Math.random().toString(36).slice(-8);
+        const passwordHash = await bcryptjs.hash(randomPassword, 10);
 
-            usuario = await UsuariosModel.createUser({
-                nombre: name || newUsername,
-                correo: email,
-                username: newUsername,
-                passwordHash: passwordHash,
-                proveedor_auth: 'google',
-                area_id: null,
-                activo: true
-            });
+        // Usar la parte local del correo como username (asegurar unicidad podría requerir más lógica, por ahora simple)
+        let newUsername = email.split("@")[0];
 
-            // Asignar rol de Colaborador (ID 4)
-            await UsuarioRolesModel.createUserRole({
-                usuario_id: usuario.id,
-                rol_id: 4 
-            });
+        // Verificar si el username ya existe (caso raro donde correo es diferente pero username igual)
+        // Por simplicidad en este paso, asumimos que email es único y username derivado también.
+        // Si choca, fallará la creación (depende de constraints), pero google emails son únicos.
 
-            // Si llegamos aquí, usuario ya es un objeto con id, nombre, etc.
-            
-        } catch (createError) {
-            console.error("Error al auto-registrar usuario:", createError);
-            return res.status(500).json({
-                message: "Error al registrar nuevo usuario con Google",
-                error: createError.message
-            });
-        }
+        usuario = await UsuariosModel.createUser({
+          nombre: name || newUsername,
+          correo: email,
+          username: newUsername,
+          passwordHash: passwordHash,
+          proveedor_auth: "google",
+          area_id: null,
+          activo: true,
+        });
+
+        // Asignar rol de Colaborador (ID 4)
+        await UsuarioRolesModel.createUserRole({
+          usuario_id: usuario.id,
+          rol_id: 4,
+        });
+
+        // Si llegamos aquí, usuario ya es un objeto con id, nombre, etc.
+      } catch (createError) {
+        console.error("Error al auto-registrar usuario:", createError);
+        return res.status(500).json({
+          message: "Error al registrar nuevo usuario con Google",
+          error: createError.message,
+        });
+      }
     }
 
     if (!usuario.activo) {
@@ -199,7 +201,8 @@ router.post("/google-login", async (req, res) => {
 
     // Opcional: Actualizar proveedor_auth si estaba vacío
     if (usuario.proveedor_auth !== "google") {
-      await pool.request()
+      await pool
+        .request()
         .input("id", sql.Int, usuario.id)
         .input("provider", sql.NVarChar(50), "google")
         .query("UPDATE usuarios SET proveedor_auth = @provider WHERE id = @id");
@@ -228,7 +231,7 @@ router.post("/google-login", async (req, res) => {
         area: usuario.area,
         roles: roles,
         rol_nombre: rolPrincipal,
-        provider: 'google'
+        provider: "google",
       },
       JWT_SECRET,
       { expiresIn: "24h" }
@@ -242,12 +245,12 @@ router.post("/google-login", async (req, res) => {
         nombre: usuario.nombre,
         username: usuario.username,
         area: usuario.area,
+        force_password_change: !!usuario.force_password_change,
         rol_nombre: rolPrincipal,
         roles: roles,
-        googleId: googleId
+        googleId: googleId,
       },
     });
-
   } catch (error) {
     console.error("Error en google-login:", error);
     res.status(500).json({

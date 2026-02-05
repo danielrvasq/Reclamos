@@ -78,9 +78,6 @@ app.use("/api/clases-matriz", clasesMatrizRoutes);
 app.use("/api/causas-matriz", causasMatrizRoutes);
 
 // Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
-  console.log(`Prueba la conexión en http://localhost:${PORT}/api/db-test`);
-});
+app.listen(PORT, () => {});
 
 export default app;

@@ -6,8 +6,9 @@ class AreaModel {
     try {
       const pool = await poolPromise;
       const result = await pool.request().query(
-        `SELECT id, nombre, responsable
+        `SELECT id, nombre, responsable, activo
          FROM area
+        WHERE activo = 1
          ORDER BY nombre ASC`
       );
       return result.recordset;
@@ -24,13 +25,31 @@ class AreaModel {
         .request()
         .input("id", sql.Int, id)
         .query(
-          `SELECT id, nombre, responsable
+          `SELECT id, nombre, responsable, activo
            FROM area
            WHERE id = @id`
         );
       return result.recordset[0] || null;
     } catch (err) {
       throw new Error(`Error al obtener área: ${err.message}`);
+    }
+  }
+
+  // Obtener área por nombre (case-insensitive)
+  static async getAreaByNombre(nombre) {
+    try {
+      const pool = await poolPromise;
+      const result = await pool
+        .request()
+        .input("nombre", sql.NVarChar(100), nombre)
+        .query(
+          `SELECT TOP 1 id, nombre, responsable, activo
+           FROM area
+           WHERE LOWER(nombre) = LOWER(@nombre)`
+        );
+      return result.recordset[0] || null;
+    } catch (err) {
+      throw new Error(`Error al obtener área por nombre: ${err.message}`);
     }
   }
 
@@ -84,8 +103,8 @@ class AreaModel {
       await pool
         .request()
         .input("id", sql.Int, id)
-        .query("DELETE FROM area WHERE id = @id");
-      return { message: "Área eliminada correctamente" };
+        .query("UPDATE area SET activo = 0 WHERE id = @id");
+      return { message: "Área inactivada correctamente" };
     } catch (err) {
       throw new Error(`Error al eliminar área: ${err.message}`);
     }

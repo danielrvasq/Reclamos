@@ -17,41 +17,32 @@ class EmailNotificationService {
     causa_id
   ) {
     try {
-      console.log("\n📧 [EMAIL] Obteniendo correo para PRIMER CONTACTO");
-      console.log(
-        `   Clasificación: ${clasificacion_id}, Clase: ${clase_id}, Causa: ${causa_id}`
-      );
-
       const matriz = await MatrizDireccionamientoModel.findByClasificacion(
         clasificacion_id,
         clase_id,
         causa_id
       );
 
-      if (!matriz || !matriz.primer_contacto_id) {
-        console.log("   ⚠️ No se encontró matriz o primer_contacto_id");
+      if (!matriz || !matriz.primer_contacto_ids?.length) {
         return [];
       }
 
-      const usuario = await UsuariosModel.getUserById(
-        matriz.primer_contacto_id
-      );
-      if (!usuario || !usuario.correo) {
-        console.log(`   ⚠️ Usuario ${matriz.primer_contacto_id} sin correo`);
-        return [];
-      }
+      const contactos = [];
 
-      console.log(`   ✅ Correo encontrado: ${usuario.correo}`);
-      console.log(`   👤 Usuario: ${usuario.nombre}`);
-      console.log(`   📝 Acción: Registrar observaciones de primer contacto`);
+      for (const userId of matriz.primer_contacto_ids) {
+        const usuario = await UsuariosModel.getUserById(userId);
+        if (!usuario || !usuario.correo) {
+          continue;
+        }
 
-      return [
-        {
+        contactos.push({
           email: usuario.correo,
           nombre: usuario.nombre,
           rol: "Primer Contacto",
-        },
-      ];
+        });
+      }
+
+      return contactos;
     } catch (err) {
       console.error(
         "❌ Error obteniendo correos primer contacto:",
@@ -67,11 +58,6 @@ class EmailNotificationService {
    */
   static async obtenerCorreosTratamiento(clasificacion_id, clase_id, causa_id) {
     try {
-      console.log("\n📧 [EMAIL] Obteniendo correo para TRATAMIENTO");
-      console.log(
-        `   Clasificación: ${clasificacion_id}, Clase: ${clase_id}, Causa: ${causa_id}`
-      );
-
       const matriz = await MatrizDireccionamientoModel.findByClasificacion(
         clasificacion_id,
         clase_id,
@@ -79,7 +65,6 @@ class EmailNotificationService {
       );
 
       if (!matriz || !matriz.responsable_tratamiento_id) {
-        console.log("   ⚠️ No se encontró matriz o responsable_tratamiento_id");
         return [];
       }
 
@@ -87,15 +72,8 @@ class EmailNotificationService {
         matriz.responsable_tratamiento_id
       );
       if (!usuario || !usuario.correo) {
-        console.log(
-          `   ⚠️ Usuario ${matriz.responsable_tratamiento_id} sin correo`
-        );
         return [];
       }
-
-      console.log(`   ✅ Correo encontrado: ${usuario.correo}`);
-      console.log(`   👤 Usuario: ${usuario.nombre}`);
-      console.log(`   📝 Acción: Registrar solución final`);
 
       return [
         { email: usuario.correo, nombre: usuario.nombre, rol: "Tratamiento" },
@@ -112,8 +90,6 @@ class EmailNotificationService {
    */
   static async obtenerCorreosLideres() {
     try {
-      console.log("\n📧 [EMAIL] Obteniendo correos para LÍDERES (Revisión)");
-
       const pool = await poolPromise;
       const result = await pool
         .request()
@@ -126,14 +102,6 @@ class EmailNotificationService {
         `);
 
       const usuarios = result.recordset;
-      console.log(`   ✅ ${usuarios.length} líder(es) encontrado(s)`);
-
-      usuarios.forEach((u) => {
-        console.log(`      👤 ${u.nombre} (${u.correo})`);
-      });
-
-      console.log(`   📝 Acción: Revisar reclamo y aprobar/rechazar`);
-
       return usuarios.map((u) => ({
         email: u.correo,
         nombre: u.nombre,
@@ -151,23 +119,14 @@ class EmailNotificationService {
    */
   static async obtenerCorreoResponsableActual(persona_responsable_id) {
     try {
-      console.log("\n📧 [EMAIL] Obteniendo correo del responsable actual");
-      console.log(`   Usuario ID: ${persona_responsable_id}`);
-
       if (!persona_responsable_id) {
-        console.log("   ⚠️ No hay responsable actual");
         return [];
       }
 
       const usuario = await UsuariosModel.getUserById(persona_responsable_id);
       if (!usuario || !usuario.correo) {
-        console.log(`   ⚠️ Usuario ${persona_responsable_id} sin correo`);
         return [];
       }
-
-      console.log(`   ✅ Correo encontrado: ${usuario.correo}`);
-      console.log(`   👤 Usuario: ${usuario.nombre}`);
-      console.log(`   📝 Acción: Notificación de aprobación`);
 
       return [
         { email: usuario.correo, nombre: usuario.nombre, rol: "Responsable" },
@@ -189,12 +148,6 @@ class EmailNotificationService {
     observaciones
   ) {
     try {
-      console.log("\n📧 [EMAIL] Obteniendo correo para RECHAZO");
-      console.log(
-        `   Clasificación: ${clasificacion_id}, Clase: ${clase_id}, Causa: ${causa_id}`
-      );
-      console.log(`   Motivo: ${observaciones}`);
-
       const matriz = await MatrizDireccionamientoModel.findByClasificacion(
         clasificacion_id,
         clase_id,
@@ -202,7 +155,6 @@ class EmailNotificationService {
       );
 
       if (!matriz || !matriz.responsable_tratamiento_id) {
-        console.log("   ⚠️ No se encontró matriz o responsable_tratamiento_id");
         return [];
       }
 
@@ -210,15 +162,8 @@ class EmailNotificationService {
         matriz.responsable_tratamiento_id
       );
       if (!usuario || !usuario.correo) {
-        console.log(
-          `   ⚠️ Usuario ${matriz.responsable_tratamiento_id} sin correo`
-        );
         return [];
       }
-
-      console.log(`   ✅ Correo encontrado: ${usuario.correo}`);
-      console.log(`   👤 Usuario: ${usuario.nombre}`);
-      console.log(`   📝 Acción: Revisar observaciones y corregir solución`);
 
       return [
         {
@@ -237,31 +182,9 @@ class EmailNotificationService {
    * Registra un resumen de correos que se enviarían
    */
   static logResumen(paso, correos, detallesReclamo = {}) {
-    console.log("\n" + "=".repeat(70));
-    console.log(`📬 RESUMEN - ${paso}`);
-    console.log("=".repeat(70));
-
-    if (detallesReclamo.id) {
-      console.log(`Reclamo ID: ${detallesReclamo.id}`);
-    }
-    if (detallesReclamo.producto) {
-      console.log(`Producto: ${detallesReclamo.producto}`);
-    }
-    if (detallesReclamo.cliente) {
-      console.log(`Cliente: ${detallesReclamo.cliente}`);
-    }
-
-    console.log("\n📧 Correos a enviar:");
-
-    if (correos.length === 0) {
-      console.log("   ❌ No hay correos para enviar");
-    } else {
-      correos.forEach((c, idx) => {
-        console.log(`   ${idx + 1}. ${c.email} (${c.nombre}) - Rol: ${c.rol}`);
-      });
-    }
-
-    console.log("=".repeat(70) + "\n");
+    void paso;
+    void correos;
+    void detallesReclamo;
   }
 
   /**
@@ -294,7 +217,6 @@ class EmailNotificationService {
           subject: `📋 Nuevo Reclamo Asignado - ID ${detallesReclamo.id}`,
           html,
         });
-        console.log(`✅ Email enviado a ${destinatario.email}`);
       }
     } catch (err) {
       console.error(
@@ -335,7 +257,6 @@ class EmailNotificationService {
           subject: `📋 Reclamo en Tratamiento - ID ${detallesReclamo.id}`,
           html,
         });
-        console.log(`✅ Email enviado a ${destinatario.email}`);
       }
     } catch (err) {
       console.error(
@@ -367,7 +288,6 @@ class EmailNotificationService {
           subject: `📋 Reclamo Pendiente de Revisión - ID ${detallesReclamo.id}`,
           html,
         });
-        console.log(`✅ Email enviado a ${destinatario.email}`);
       }
     } catch (err) {
       console.error(
@@ -404,7 +324,6 @@ class EmailNotificationService {
           subject: `✅ Reclamo Aprobado y Cerrado - ID ${detallesReclamo.id}`,
           html,
         });
-        console.log(`✅ Email enviado a ${destinatario.email}`);
       }
     } catch (err) {
       console.error("❌ Error enviando notificación aprobación:", err.message);
@@ -444,7 +363,6 @@ class EmailNotificationService {
           subject: `⚠️ Reclamo Rechazado - Requiere Corrección - ID ${detallesReclamo.id}`,
           html,
         });
-        console.log(`✅ Email enviado a ${destinatario.email}`);
       }
     } catch (err) {
       console.error("❌ Error enviando notificación rechazo:", err.message);

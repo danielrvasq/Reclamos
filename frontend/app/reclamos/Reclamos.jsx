@@ -35,6 +35,7 @@ function Reclamos() {
   const [reclamos, setReclamos] = useState([]);
   const [estadosReclamo, setEstadosReclamo] = useState([]);
   const [areas, setAreas] = useState([]);
+  const [matrices, setMatrices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showInvoiceForm, setShowInvoiceForm] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
@@ -73,13 +74,6 @@ function Reclamos() {
         setUsuarioId(usuario.id);
         setUsuarioArea(usuario.area);
         setUsuarioRol(usuario.rol_nombre || usuario.rol);
-        console.log("DEBUG - Usuario cargado desde localStorage:", {
-          id: usuario.id,
-          area: usuario.area,
-          rol_nombre: usuario.rol_nombre,
-          rol: usuario.rol,
-          usuarioCompleto: usuario,
-        });
       } catch (error) {
         console.error("Error al cargar datos del usuario:", error);
       }
@@ -88,6 +82,7 @@ function Reclamos() {
     fetchReclamos();
     fetchEstadosReclamo();
     fetchAreas();
+    fetchMatrices();
   }, []);
 
   const fetchReclamos = async () => {
@@ -97,17 +92,6 @@ function Reclamos() {
       const json = await res.json();
       if (res.ok) {
         const data = json.data || [];
-        console.log("DEBUG - Reclamos cargados:", {
-          total: data.length,
-          detalles: data.map((r) => ({
-            id: r.id,
-            cliente: r.cliente,
-            persona_responsable: r.persona_responsable,
-            proceso_responsable: r.proceso_responsable,
-            estado_id: r.estado_id,
-            estado_nombre: r.estado_nombre,
-          })),
-        });
         setReclamos(data);
       }
     } catch (error) {
@@ -144,6 +128,38 @@ function Reclamos() {
     }
   };
 
+  const fetchMatrices = async () => {
+    try {
+      const res = await authFetch(`${API_BASE}/matriz-direccionamiento`);
+      const json = await res.json();
+      if (res.ok) {
+        setMatrices(json.data || []);
+      }
+    } catch (error) {
+      console.error("Error al cargar matriz:", error);
+    }
+  };
+
+  const obtenerMatrizParaReclamo = (reclamo) => {
+    if (!reclamo) return null;
+    return matrices.find(
+      (m) =>
+        m.clasificacion_id === reclamo.clasificacion_id &&
+        m.clase_id === reclamo.clase_id &&
+        m.causa_id === reclamo.causa_id
+    );
+  };
+
+  const esUsuarioPrimerContacto = (reclamo) => {
+    if (!usuarioId) return false;
+    const matriz = obtenerMatrizParaReclamo(reclamo);
+    const ids =
+      matriz?.primer_contacto_ids ||
+      (matriz?.primer_contacto_id ? [matriz.primer_contacto_id] : []);
+    const userId = parseInt(usuarioId, 10);
+    return ids.map((id) => parseInt(id, 10)).includes(userId);
+  };
+
   // Separar reclamos por estado (basado en estado_id o lógica de negocio)
   // Mostrar todos los reclamos en una sola lista
   // Filtrar por área del usuario si es colaborador
@@ -155,21 +171,6 @@ function Reclamos() {
         const procesoId = parseInt(r.proceso_responsable, 10);
         const usuarioId = parseInt(usuarioArea, 10);
         return procesoId === usuarioId;
-      });
-      console.log("DEBUG - Colaborador filtrando reclamos:", {
-        usuarioArea,
-        usuarioAreaType: typeof usuarioArea,
-        totalReclamos: reclamos.length,
-        reclamsFiltrados: filtrados.length,
-        areaComparison: reclamos.map((r) => ({
-          id: r.id,
-          proceso_responsable: r.proceso_responsable,
-          procesoId: parseInt(r.proceso_responsable, 10),
-          usuarioArea,
-          usuarioId: parseInt(usuarioArea, 10),
-          match:
-            parseInt(r.proceso_responsable, 10) === parseInt(usuarioArea, 10),
-        })),
       });
       return filtrados;
     }
@@ -184,30 +185,17 @@ function Reclamos() {
       const mis = reclamos.filter((r) => {
         const personaResp = parseInt(r.persona_responsable, 10);
         // Solo mostrar si es responsable Y está en primer contacto (6), tratamiento (7) o revisión (24)
+        const esPrimerContacto =
+          r.estado_id === 6 && esUsuarioPrimerContacto(r);
         return (
-          personaResp === userId &&
+          (personaResp === userId || esPrimerContacto) &&
           (r.estado_id === 6 || r.estado_id === 7 || r.estado_id === 24)
         );
-      });
-      console.log("DEBUG - misReclamos filter:", {
-        usuarioId,
-        usuarioIdParsed: userId,
-        totalReclamos: reclamos.length,
-        misReclamosCount: mis.length,
-        detalles: reclamos.map((r) => ({
-          id: r.id,
-          persona_responsable: r.persona_responsable,
-          personaResp_parsed: parseInt(r.persona_responsable, 10),
-          estado_id: r.estado_id,
-          usuarioId,
-          userId_parsed: userId,
-          match: parseInt(r.persona_responsable, 10) === userId,
-        })),
       });
       return mis;
     }
     return [];
-  }, [reclamos, usuarioRol, usuarioId]);
+  }, [reclamos, usuarioRol, usuarioId, matrices]);
 
   // Filtrar reclamos en revisión (estado 24) para rol "lider_reclamos"
   const reclamosEnRevision = useMemo(() => {
@@ -304,19 +292,21 @@ function Reclamos() {
       const res = await authFetch(`${API_BASE}/reclamos/${row.id}/aprobar`, {
         method: "POST",
       });
+      const json = await res.json();
       if (res.ok) {
         await fetchReclamos();
         setToastMessage("Reclamo aprobado y cerrado correctamente");
-        setToastVisible(true);
-        setTimeout(() => setToastVisible(false), 3000);
+      } else {
+        setToastMessage(json.message || "No se pudo aprobar el reclamo");
       }
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 3000);
     } catch (error) {
       console.error("Error al aprobar:", error);
       setToastMessage("Error al aprobar reclamo");
       setToastVisible(true);
       setTimeout(() => setToastVisible(false), 3000);
     }
-    
   };
 
   const handleRechazar = async (row) => {
@@ -340,12 +330,15 @@ function Reclamos() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ observaciones: observacion.trim() }),
       });
+      const json = await res.json();
       if (res.ok) {
         await fetchReclamos();
         setToastMessage("Reclamo rechazado, vuelve a tratamiento");
-        setToastVisible(true);
-        setTimeout(() => setToastVisible(false), 3000);
+      } else {
+        setToastMessage(json.message || "No se pudo rechazar el reclamo");
       }
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 3000);
     } catch (error) {
       console.error("Error al rechazar:", error);
       setToastMessage("Error al rechazar reclamo");
@@ -372,6 +365,21 @@ function Reclamos() {
   };
 
   const handleOpenSolucion = (reclamo) => {
+    if (!reclamo) return;
+    const userId = parseInt(usuarioId, 10);
+    const personaResp = parseInt(reclamo.persona_responsable, 10);
+    const puedeRegistrar =
+      canApproveReclaims(usuarioRol) || personaResp === userId;
+
+    if (!puedeRegistrar) {
+      setToastMessage(
+        "No tienes permisos para registrar la solución de este reclamo"
+      );
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 3000);
+      return;
+    }
+
     setReclamoSolucion(reclamo);
     setShowSolucionModal(true);
   };
@@ -412,6 +420,35 @@ function Reclamos() {
   const handleOpenObservaciones = (reclamo) => {
     setReclamoObservaciones(reclamo);
     setShowObservacionesModal(true);
+  };
+
+  const handleDeleteReclamo = async (reclamo) => {
+    if (!reclamo?.id) return;
+    if (!confirm("¿Está seguro de que desea eliminar este reclamo?")) return;
+
+    try {
+      const res = await authFetch(`${API_BASE}/reclamos/${reclamo.id}`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+
+      if (!res.ok) {
+        setToastMessage(json.message || "Error al eliminar reclamo");
+        setToastVisible(true);
+        setTimeout(() => setToastVisible(false), 3000);
+        return;
+      }
+
+      await fetchReclamos();
+      setToastMessage("Reclamo eliminado correctamente");
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 3000);
+    } catch (error) {
+      console.error("Error al eliminar reclamo:", error);
+      setToastMessage("Error al eliminar reclamo");
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 3000);
+    }
   };
 
   const handleCloseObservaciones = () => {
@@ -515,8 +552,9 @@ function Reclamos() {
                         {(usuarioRol === "reclamos" ||
                           usuarioRol === "administrador") &&
                           row.estado_id === 6 &&
-                          parseInt(row.persona_responsable, 10) ===
-                            parseInt(usuarioId, 10) && (
+                          (parseInt(row.persona_responsable, 10) ===
+                            parseInt(usuarioId, 10) ||
+                            esUsuarioPrimerContacto(row)) && (
                             <button
                               className="action-btn observaciones-btn"
                               onClick={() => handleOpenObservaciones(row)}
@@ -527,15 +565,19 @@ function Reclamos() {
                           )}
                         {!isReadOnlyRole(usuarioRol) && (
                           <>
-                            {row.estado_id !== 6 && row.estado_id !== 23 && (
-                              <button
-                                className="action-btn solution-btn"
-                                onClick={() => handleOpenSolucion(row)}
-                                title="Dar solución"
-                              >
-                                <CheckCircle size={16} />
-                              </button>
-                            )}
+                            {row.estado_id !== 6 &&
+                              row.estado_id !== 23 &&
+                              (canApproveReclaims(usuarioRol) ||
+                                parseInt(row.persona_responsable, 10) ===
+                                  parseInt(usuarioId, 10)) && (
+                                <button
+                                  className="action-btn solution-btn"
+                                  onClick={() => handleOpenSolucion(row)}
+                                  title="Dar solución"
+                                >
+                                  <CheckCircle size={16} />
+                                </button>
+                              )}
                             <button
                               className="action-btn edit-btn"
                               onClick={() => handleEdit(row)}
@@ -564,6 +606,15 @@ function Reclamos() {
                               </button>
                             </>
                           )}
+                        {canApproveReclaims(usuarioRol) && (
+                          <button
+                            className="action-btn delete-btn"
+                            onClick={() => handleDeleteReclamo(row)}
+                            title="Eliminar reclamo"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

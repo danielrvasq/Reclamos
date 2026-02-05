@@ -90,7 +90,7 @@ function Usuarios() {
       }
       if (!usersRes.ok) {
         throw new Error(
-          usersJson.message || "No se pudieron cargar los usuarios"
+          usersJson.message || "No se pudieron cargar los usuarios",
         );
       }
 
@@ -105,17 +105,30 @@ function Usuarios() {
         (usersJson.data || []).map(async (u) => {
           try {
             const rRes = await authFetch(
-              `${API_BASE}/usuario-roles/usuario/${u.id}`
+              `${API_BASE}/usuario-roles/usuario/${u.id}`,
             );
             const rJson = await rRes.json();
             rolesByUser[u.id] = rRes.ok ? rJson.data || [] : [];
           } catch (e) {
             rolesByUser[u.id] = [];
           }
-        })
+        }),
       );
 
-      setUsers((usersJson.data || []).map((u) => mapFromApi(u, rolesByUser)));
+      const mappedUsers = (usersJson.data || []).map((u) =>
+        mapFromApi(u, rolesByUser),
+      );
+
+      // Ordenar por nombre de área alfabéticamente
+      mappedUsers.sort((a, b) => {
+        const areaNameA =
+          areasData.find((area) => area.id === a.area_id)?.nombre || "";
+        const areaNameB =
+          areasData.find((area) => area.id === b.area_id)?.nombre || "";
+        return areaNameA.localeCompare(areaNameB);
+      });
+
+      setUsers(mappedUsers);
     } catch (err) {
       showToast(err.message || "Error cargando usuarios");
     } finally {
@@ -137,7 +150,7 @@ function Usuarios() {
       `${API_BASE}/usuario-roles/usuario/${userId}/all`,
       {
         method: "DELETE",
-      }
+      },
     );
     if (!delRes.ok) {
       throw new Error("No se pudo limpiar roles previos");
@@ -184,7 +197,7 @@ function Usuarios() {
       let rolesUsuario = [];
       try {
         const rRes = await authFetch(
-          `${API_BASE}/usuario-roles/usuario/${savedUser.id}`
+          `${API_BASE}/usuario-roles/usuario/${savedUser.id}`,
         );
         const rJson = await rRes.json();
         rolesUsuario = rRes.ok ? rJson.data || [] : [];

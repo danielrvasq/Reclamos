@@ -8,7 +8,7 @@ router.get("/", FormulariosController.getAll);
 router.get("/:id", FormulariosController.getById);
 router.post("/", FormulariosController.create);
 router.put("/:id", FormulariosController.update);
-router.delete("/:id", FormulariosController.delete);
+router.delete("/:id", requireApprovalRole, FormulariosController.delete);
 router.post("/:id/aprobar", requireApprovalRole, FormulariosController.aprobar);
 router.post(
   "/:id/rechazar",

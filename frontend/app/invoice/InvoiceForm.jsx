@@ -169,7 +169,6 @@ function InvoiceForm({
       if (causaRes.ok) setCausas(causaJson.data || []);
 
       const areaJson = await areaRes.json();
-      console.log("Areas response:", areaRes.status, areaJson);
       if (areaRes.ok) setAreas(areaJson.data || []);
 
       const usuarioJson = await usuarioRes.json();

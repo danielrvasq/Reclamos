@@ -6,7 +6,7 @@ class UsuariosModel {
     try {
       const pool = await poolPromise;
       const result = await pool.request().query(
-        `SELECT id, nombre, correo, username, proveedor_auth, area, activo, created_at
+        `SELECT id, nombre, correo, username, proveedor_auth, area, activo, force_password_change, created_at
          FROM usuarios
          ORDER BY id DESC`
       );
@@ -24,13 +24,36 @@ class UsuariosModel {
         .request()
         .input("id", sql.Int, id)
         .query(
-          `SELECT id, nombre, correo, username, proveedor_auth, area, activo, created_at
+          `SELECT id, nombre, correo, username, proveedor_auth, area, activo, force_password_change, created_at
            FROM usuarios
            WHERE id = @id`
         );
       return result.recordset[0] || null;
     } catch (err) {
       throw new Error(`Error al obtener usuario: ${err.message}`);
+    }
+  }
+
+  // Obtener usuarios por IDs
+  static async getUsersByIds(ids = []) {
+    try {
+      if (!Array.isArray(ids) || ids.length === 0) return [];
+      const pool = await poolPromise;
+      const request = pool.request();
+      const params = ids.map((id, index) => {
+        const paramName = `id${index}`;
+        request.input(paramName, sql.Int, id);
+        return `@${paramName}`;
+      });
+
+      const result = await request.query(
+        `SELECT id, nombre, correo, username, proveedor_auth, area, activo, created_at
+         FROM usuarios
+         WHERE id IN (${params.join(", ")})`
+      );
+      return result.recordset;
+    } catch (err) {
+      throw new Error(`Error al obtener usuarios por IDs: ${err.message}`);
     }
   }
 
@@ -42,7 +65,7 @@ class UsuariosModel {
         .request()
         .input("email", sql.NVarChar(255), email)
         .query(
-          `SELECT id, nombre, correo, username, proveedor_auth, area, activo, created_at
+          `SELECT id, nombre, correo, username, proveedor_auth, area, activo, force_password_change, created_at
            FROM usuarios
            WHERE correo = @email`
         );
@@ -95,6 +118,13 @@ class UsuariosModel {
         setClauses.push("password_hash = @passwordHash");
       }
 
+      if (
+        data.force_password_change !== undefined &&
+        data.force_password_change !== null
+      ) {
+        setClauses.push("force_password_change = @forcePasswordChange");
+      }
+
       if (data.activo !== undefined && data.activo !== null) {
         setClauses.push("activo = @activo");
       }
@@ -111,7 +141,12 @@ class UsuariosModel {
         .input("username", sql.NVarChar(255), data.username)
         .input("proveedorAuth", sql.NVarChar(255), data.proveedor_auth || null)
         .input("areaId", sql.Int, data.area_id || null)
-        .input("passwordHash", sql.NVarChar(255), data.passwordHash || null);
+        .input("passwordHash", sql.NVarChar(255), data.passwordHash || null)
+        .input(
+          "forcePasswordChange",
+          sql.Bit,
+          data.force_password_change ?? null
+        );
 
       if (data.activo !== undefined && data.activo !== null) {
         request.input("activo", sql.Bit, data.activo);
@@ -122,6 +157,28 @@ class UsuariosModel {
       return await this.getUserById(id);
     } catch (err) {
       throw new Error(`Error al actualizar usuario: ${err.message}`);
+    }
+  }
+
+  // Actualizar contraseña (y resetear force_password_change)
+  static async updatePassword(id, passwordHash, forcePasswordChange = false) {
+    try {
+      const pool = await poolPromise;
+      await pool
+        .request()
+        .input("id", sql.Int, id)
+        .input("passwordHash", sql.NVarChar(255), passwordHash)
+        .input("forcePasswordChange", sql.Bit, forcePasswordChange)
+        .query(
+          `UPDATE usuarios
+           SET password_hash = @passwordHash,
+               force_password_change = @forcePasswordChange
+           WHERE id = @id`
+        );
+
+      return await this.getUserById(id);
+    } catch (err) {
+      throw new Error(`Error al actualizar contraseña: ${err.message}`);
     }
   }
 

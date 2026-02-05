@@ -10,6 +10,7 @@ import Matrices from "./matrices/Matrices";
 import Auditoria from "./auditoria/Auditoria";
 import Layout from "./layout/Layout";
 import Usuarios from "./usuarios/Usuarios";
+import ForcePasswordChange from "./usuarios/ForcePasswordChange";
 import Config from "./config/Config";
 import ProtectedRoute from "./common/ProtectedRoute";
 import "./App.css";
@@ -44,6 +45,14 @@ function App() {
               <Layout>
                 <Usuarios />
               </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cambiar-contrasena"
+          element={
+            <ProtectedRoute>
+              <ForcePasswordChange />
             </ProtectedRoute>
           }
         />

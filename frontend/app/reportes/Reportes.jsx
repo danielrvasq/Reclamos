@@ -774,6 +774,65 @@ function Reportes() {
       .sort((a, b) => a.causa.localeCompare(b.causa));
   }, [reclamos, causas, matrizDireccionamiento, estadosReclamo]);
 
+  const tiempoRespuestaCausa2026Data = useMemo(() => {
+    const estadoCerradoId = estadosReclamo.find(
+      (e) => e.nombre && e.nombre.toLowerCase().includes("cerrado")
+    )?.id;
+
+    const causaStats = {};
+
+    causas.forEach((causa) => {
+      causaStats[causa.id] = {
+        nombre: causa.nombre || `Causa ${causa.id}`,
+        totalDias: 0,
+        count: 0,
+        tiempoTeorico: null,
+      };
+    });
+
+    // Calcular promedio real de días demorados por causa (solo cerrados del 2026)
+    reclamos.forEach((r) => {
+      if (!r.causa_id || r.estado_id !== estadoCerradoId) return;
+      if (!r.dias_habiles_demora || r.dias_habiles_demora <= 0) return;
+
+      // Filtrar solo reclamos del 2026
+      if (r.fecha_creacion) {
+        const d = new Date(r.fecha_creacion);
+        if (d.getFullYear() !== 2026) return;
+      } else {
+        return;
+      }
+
+      if (causaStats[r.causa_id]) {
+        causaStats[r.causa_id].totalDias += r.dias_habiles_demora;
+        causaStats[r.causa_id].count += 1;
+      }
+    });
+
+    // Obtener tiempo teórico de la matriz
+    matrizDireccionamiento.forEach((matriz) => {
+      if (matriz.causa_id && causaStats[matriz.causa_id]) {
+        if (causaStats[matriz.causa_id].tiempoTeorico === null) {
+          causaStats[matriz.causa_id].tiempoTeorico =
+            matriz.tiempo_respuesta_dias || 0;
+        }
+      }
+    });
+
+    // Convertir a array y calcular promedios
+    return Object.values(causaStats)
+      .filter((stat) => stat.count > 0 || stat.tiempoTeorico !== null)
+      .map((stat) => ({
+        causa: stat.nombre,
+        diasPromedio:
+          stat.count > 0
+            ? parseFloat((stat.totalDias / stat.count).toFixed(2))
+            : null,
+        tiempoRespuesta: stat.tiempoTeorico || 0,
+      }))
+      .sort((a, b) => a.causa.localeCompare(b.causa));
+  }, [reclamos, causas, matrizDireccionamiento, estadosReclamo]);
+
   const clasificacionesMesComparisonData = useMemo(() => {
     const years = [2024, 2025, 2026];
     const monthLabels = [
@@ -1243,7 +1302,8 @@ function Reportes() {
 
             <div className="chart-card">
               <h3 className="chart-title">
-                Días Hábiles Demorados vs Tiempo de Respuesta por Causa
+                Días Hábiles Demorados vs Tiempo de Respuesta por Causa -
+                Historico
               </h3>
               <ResponsiveContainer width="100%" height={320}>
                 <ComposedChart data={tiempoRespuestaCausaData}>
@@ -1284,6 +1344,43 @@ function Reportes() {
               </h3>
               <ResponsiveContainer width="100%" height={320}>
                 <ComposedChart data={tiempoRespuestaCausa2025Data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="causa"
+                    angle={-45}
+                    textAnchor="end"
+                    height={120}
+                    interval={0}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="diasPromedio"
+                    name="Días Hábiles Demorados (Promedio)"
+                    fill="#60a5fa"
+                    radius={[6, 6, 0, 0]}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="tiempoRespuesta"
+                    name="Tiempo de Respuesta (Días)"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    dot={{ fill: "#ef4444", r: 4 }}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="chart-card">
+              <h3 className="chart-title">
+                Días Hábiles Demorados vs Tiempo de Respuesta por Causa - Año
+                2026
+              </h3>
+              <ResponsiveContainer width="100%" height={320}>
+                <ComposedChart data={tiempoRespuestaCausa2026Data}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="causa"

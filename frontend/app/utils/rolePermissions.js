@@ -10,13 +10,38 @@ const ROLE_PERMISSIONS = {
     "/config",
     "/area",
     "/auditoria",
+    "/cambiar-contrasena",
   ],
   reclamos: ["/dashboard", "/reclamos", "/reportes"],
-  "Lider Reclamos": ["/dashboard", "/reclamos", "/reportes", "/auditoria"],
-  "lider Reclamos": ["/dashboard", "/reclamos", "/reportes", "/auditoria"],
-  "lider reclamos": ["/dashboard", "/reclamos", "/reportes", "/auditoria"],
-  colaborador: ["/dashboard", "/reclamos", "/reportes"],
-  auditor: ["/dashboard", "/reclamos", "/reportes", "/auditoria"],
+  "Lider Reclamos": [
+    "/dashboard",
+    "/reclamos",
+    "/reportes",
+    "/auditoria",
+    "/cambiar-contrasena",
+  ],
+  "lider Reclamos": [
+    "/dashboard",
+    "/reclamos",
+    "/reportes",
+    "/auditoria",
+    "/cambiar-contrasena",
+  ],
+  "lider reclamos": [
+    "/dashboard",
+    "/reclamos",
+    "/reportes",
+    "/auditoria",
+    "/cambiar-contrasena",
+  ],
+  colaborador: ["/dashboard", "/reclamos", "/reportes", "/cambiar-contrasena"],
+  auditor: [
+    "/dashboard",
+    "/reclamos",
+    "/reportes",
+    "/auditoria",
+    "/cambiar-contrasena",
+  ],
 };
 
 export const getPermittedRoutes = (rol) => {

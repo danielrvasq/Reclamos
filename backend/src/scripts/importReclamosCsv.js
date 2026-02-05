@@ -146,9 +146,7 @@ const loadAreas = async () => {
 };
 
 const main = async () => {
-  console.log(`Leyendo CSV desde: ${CSV_PATH}`);
   const records = readCsv();
-  console.log(`Filas encontradas (incluye encabezados si existen): ${records.length}`);
 
   const areaMap = await loadAreas();
   const unmappedAreas = new Set();
@@ -170,8 +168,6 @@ const main = async () => {
       console.error(`Error en fila ${i + 1}: ${err.message}`);
     }
   }
-
-  console.log(`Insertados: ${inserted}/${records.length}`);
 
   if (unmappedAreas.size > 0) {
     console.warn("Áreas sin mapear (deben existir en tabla area):", [
@@ -196,7 +192,6 @@ const isMainModule = (() => {
 if (isMainModule) {
   main()
     .then(() => {
-      console.log("Importación finalizada");
       process.exit(0);
     })
     .catch((err) => {

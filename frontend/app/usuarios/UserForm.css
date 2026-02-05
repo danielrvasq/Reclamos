@@ -120,9 +120,14 @@
 }
 
 .uf-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.uf-field.full,
+.uf-policy {
+  grid-column: 1 / -1;
 }
 
 .uf-field {
@@ -143,6 +148,79 @@
   border-radius: 8px;
   font-size: 14px;
   color: #2a2a2a;
+}
+
+.uf-password {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.uf-password input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.uf-eye {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6e6e6e;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.uf-eye:hover {
+  background: #f3f3f3;
+}
+
+.uf-policy {
+  border: 1px dashed #d0d0d0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fafafa;
+}
+
+.uf-policy span {
+  display: block;
+  font-size: 12px;
+  color: #5a5a5a;
+  margin-bottom: 6px;
+}
+
+.uf-policy ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+}
+
+.uf-policy li {
+  font-size: 12px;
+  color: #9a9a9a;
+  position: relative;
+  padding-left: 16px;
+}
+
+.uf-policy li::before {
+  content: "✕";
+  position: absolute;
+  left: 0;
+  color: #e74c3c;
+  font-size: 11px;
+}
+
+.uf-policy li.ok {
+  color: #1f7a1f;
+}
+
+.uf-policy li.ok::before {
+  content: "✓";
+  color: #22c55e;
 }
 
 .uf-footer {
@@ -182,6 +260,9 @@
 
 /* Mobile responsive styles */
 @media (max-width: 768px) {
+  .uf-grid {
+    grid-template-columns: 1fr;
+  }
   .uf-modal {
     width: 95vw;
     margin: 10px;

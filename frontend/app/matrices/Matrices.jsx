@@ -72,11 +72,10 @@ function Matrices() {
       clasificacion_id: matrixPayload.clasificacion_id,
       clase_id: matrixPayload.clase_id,
       causa_id: matrixPayload.causa_id,
-      primer_contacto_id: matrixPayload.primer_contacto_id,
+      primer_contacto_ids: matrixPayload.primer_contacto_ids || [],
       tiempo_atencion_inicial_dias:
         matrixPayload.tiempo_atencion_inicial_dias ?? null,
       responsable_tratamiento_id: matrixPayload.responsable_tratamiento_id,
-      correo_responsable: matrixPayload.correo_responsable || null,
       tiempo_respuesta_dias: matrixPayload.tiempo_respuesta_dias ?? null,
       tipo_respuesta: matrixPayload.tipo_respuesta || null,
     };
@@ -140,6 +139,17 @@ function Matrices() {
     return usuarios.find((u) => u.id === id)?.nombre || "—";
   };
 
+  const getUsuarioNombres = (ids = [], fallbackNombres = []) => {
+    if (Array.isArray(fallbackNombres) && fallbackNombres.length > 0) {
+      return fallbackNombres.join(", ");
+    }
+
+    if (!Array.isArray(ids) || ids.length === 0) return "—";
+    return ids
+      .map((id) => usuarios.find((u) => u.id === id)?.nombre || `ID: ${id}`)
+      .join(", ");
+  };
+
   return (
     <div className="matrices-page">
       <div className="matrices-header">
@@ -198,7 +208,6 @@ function Matrices() {
                 <th>Tiempo Atención (d)</th>
                 <th>Tiempo Respuesta (d)</th>
                 <th>Tipo Respuesta</th>
-                <th>Correo Resp.</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -209,9 +218,12 @@ function Matrices() {
                   <td>{getNombre(matrix.clase_id, clases)}</td>
                   <td>{getNombre(matrix.causa_id, causas)}</td>
                   <td>
-                    {getUsuarioNombre(
-                      matrix.primer_contacto_id,
-                      matrix.primer_contacto_nombre
+                    {getUsuarioNombres(
+                      matrix.primer_contacto_ids ||
+                        (matrix.primer_contacto_id
+                          ? [matrix.primer_contacto_id]
+                          : []),
+                      matrix.primer_contacto_nombres
                     )}
                   </td>
                   <td>
@@ -223,7 +235,6 @@ function Matrices() {
                   <td>{matrix.tiempo_atencion_inicial_dias ?? "—"}</td>
                   <td>{matrix.tiempo_respuesta_dias ?? "—"}</td>
                   <td>{matrix.tipo_respuesta || "—"}</td>
-                  <td>{matrix.correo_responsable || "—"}</td>
                   <td className="matrix-actions">
                     <button
                       className="icon-btn edit"

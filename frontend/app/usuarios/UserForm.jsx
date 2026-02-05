@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { X, UserPlus, ChevronDown } from "lucide-react";
+import { X, UserPlus, ChevronDown, Eye, EyeOff } from "lucide-react";
 import "./UserForm.css";
 
 function UserForm({
@@ -20,16 +20,44 @@ function UserForm({
   });
   const [password2, setPassword2] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
 
   const update = (field) => (e) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
 
+  const getPasswordPolicyError = (password) => {
+    if (!password) return "";
+    if (password.length < 10)
+      return "La contraseña debe tener al menos 10 caracteres";
+    if (!/[A-Z]/.test(password))
+      return "La contraseña debe incluir una mayúscula";
+    if (!/\d/.test(password)) return "La contraseña debe incluir un número";
+    if (!/[^A-Za-z0-9]/.test(password))
+      return "La contraseña debe incluir un caracter especial";
+    return "";
+  };
+
+  const passwordChecks = {
+    length: form.password.length >= 10,
+    uppercase: /[A-Z]/.test(form.password),
+    number: /\d/.test(form.password),
+    special: /[^A-Za-z0-9]/.test(form.password),
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     // Solo validar contraseñas si se está ingresando una nueva (creación o cambio)
-    if (form.password && form.password !== password2) {
-      setPasswordError("Las contraseñas no coinciden");
-      return;
+    if (form.password) {
+      const policyError = getPasswordPolicyError(form.password);
+      if (policyError) {
+        setPasswordError(policyError);
+        return;
+      }
+      if (form.password !== password2) {
+        setPasswordError("Las contraseñas no coinciden");
+        return;
+      }
     }
 
     const now = new Date().toISOString();
@@ -96,6 +124,104 @@ function UserForm({
               />
             </label>
 
+            <label className={`uf-field ${passwordError ? "invalid" : ""}`}>
+              <span>
+                Contraseña{editData ? " (dejar vacío para no cambiar)" : ""}
+              </span>
+              <div className="uf-password">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={(e) => {
+                    update("password")(e);
+                    const policyError = getPasswordPolicyError(e.target.value);
+                    if (policyError) {
+                      setPasswordError(policyError);
+                      return;
+                    }
+                    if (password2 && e.target.value !== password2) {
+                      setPasswordError("Las contraseñas no coinciden");
+                      return;
+                    }
+                    setPasswordError("");
+                  }}
+                  placeholder="••••••••"
+                  required={!editData}
+                />
+                <button
+                  type="button"
+                  className="uf-eye"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={
+                    showPassword ? "Ocultar contraseña" : "Ver contraseña"
+                  }
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </label>
+            <label className={`uf-field ${passwordError ? "invalid" : ""}`}>
+              <span>Confirmar contraseña</span>
+              <div className="uf-password">
+                <input
+                  type={showPassword2 ? "text" : "password"}
+                  value={password2}
+                  onChange={(e) => {
+                    setPassword2(e.target.value);
+                    const policyError = getPasswordPolicyError(form.password);
+                    if (policyError) {
+                      setPasswordError(policyError);
+                      return;
+                    }
+                    if (
+                      form.password &&
+                      e.target.value &&
+                      form.password !== e.target.value
+                    ) {
+                      setPasswordError("Las contraseñas no coinciden");
+                      return;
+                    }
+                    setPasswordError("");
+                  }}
+                  placeholder="••••••••"
+                  required={!editData && !!form.password}
+                />
+                <button
+                  type="button"
+                  className="uf-eye"
+                  onClick={() => setShowPassword2((prev) => !prev)}
+                  aria-label={
+                    showPassword2 ? "Ocultar contraseña" : "Ver contraseña"
+                  }
+                >
+                  {showPassword2 ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {passwordError && (
+                <small className="uf-error">{passwordError}</small>
+              )}
+            </label>
+
+            {form.password && (
+              <div className="uf-policy">
+                <span>Política de contraseña</span>
+                <ul>
+                  <li className={passwordChecks.length ? "ok" : ""}>
+                    Al menos 10 caracteres
+                  </li>
+                  <li className={passwordChecks.uppercase ? "ok" : ""}>
+                    Una mayúscula
+                  </li>
+                  <li className={passwordChecks.number ? "ok" : ""}>
+                    Un número
+                  </li>
+                  <li className={passwordChecks.special ? "ok" : ""}>
+                    Un caracter especial
+                  </li>
+                </ul>
+              </div>
+            )}
+
             <label className="uf-field">
               <span>Email</span>
               <input
@@ -106,42 +232,7 @@ function UserForm({
                 required
               />
             </label>
-
-            <label className={`uf-field ${passwordError ? "invalid" : ""}`}>
-              <span>
-                Contraseña{editData ? " (dejar vacío para no cambiar)" : ""}
-              </span>
-              <input
-                type="password"
-                value={form.password}
-                onChange={update("password")}
-                placeholder="••••••••"
-                required={!editData}
-              />
-            </label>
-            <label className={`uf-field ${passwordError ? "invalid" : ""}`}>
-              <span>Confirmar contraseña</span>
-              <input
-                type="password"
-                value={password2}
-                onChange={(e) => {
-                  setPassword2(e.target.value);
-                  setPasswordError(
-                    form.password &&
-                      e.target.value &&
-                      form.password !== e.target.value
-                      ? "Las contraseñas no coinciden"
-                      : ""
-                  );
-                }}
-                placeholder="••••••••"
-                required={!editData && !!form.password}
-              />
-              {passwordError && (
-                <small className="uf-error">{passwordError}</small>
-              )}
-            </label>
-
+            
             <label className="uf-field">
               <span>Rol</span>
               <div className="select-wrap">

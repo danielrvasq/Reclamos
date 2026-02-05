@@ -24,14 +24,18 @@ export default function ProtectedRoute({ children }) {
       const rol = usuario.rol_nombre || usuario.rol || "usuario"; // Usar rol_nombre primero
       const currentPath = location.pathname;
 
-      console.log("DEBUG ProtectedRoute:", {
-        usuarioCompleto: usuario,
-        rolDetectado: rol,
-        rolOriginal: usuario.rol,
-        rolNombre: usuario.rol_nombre,
-        currentPath,
-        tieneAcceso: hasAccess(rol, currentPath),
-      });
+      if (
+        usuario.force_password_change &&
+        currentPath !== "/cambiar-contrasena"
+      ) {
+        navigate("/cambiar-contrasena", { replace: true });
+        return;
+      }
+
+      if (currentPath === "/cambiar-contrasena") {
+        setIsChecking(false);
+        return;
+      }
 
       if (!hasAccess(rol, currentPath)) {
         // Usuario no tiene permiso para esta ruta
