@@ -18,15 +18,17 @@ const transporter = nodemailer.createTransport({
  * @param {string} options.to - Correo del destinatario
  * @param {string} options.subject - Asunto del correo
  * @param {string} options.html - Contenido HTML del correo
+ * @param {Array} options.attachments - Adjuntos para el correo
  * @returns {Promise<Object>} - Información del correo enviado
  */
-const sendEmail = async ({ to, subject, html }) => {
+const sendEmail = async ({ to, subject, html, attachments = [] }) => {
   try {
     const mailOptions = {
       from: `Sistema de Reclamos <${process.env.EMAIL_FROM}>`,
       to,
       subject,
       html,
+      attachments,
     };
 
     const info = await transporter.sendMail(mailOptions);
@@ -38,9 +40,62 @@ const sendEmail = async ({ to, subject, html }) => {
 };
 
 /**
+ * Genera el HTML para notificación al cliente con carta adjunta
+ */
+const generarEmailAprobacionCliente = (reclamo) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #0ea5e9; color: white; padding: 20px; text-align: center; }
+        .content { background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
+        .footer { text-align: center; padding: 10px; font-size: 12px; color: #666; }
+        .detail { margin: 10px 0; }
+        .label { font-weight: bold; color: #555; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2>Reclamo Cerrado</h2>
+        </div>
+        <div class="content">
+          <p>Hola,</p>
+          <p>Tu reclamo ha sido cerrado. Adjuntamos la carta de respuesta.</p>
+          <div class="detail">
+            <span class="label">ID Reclamo:</span> ${reclamo?.id || "N/A"}
+          </div>
+          <div class="detail">
+            <span class="label">Producto:</span> ${reclamo?.producto || "N/A"}
+          </div>
+          <div class="detail">
+            <span class="label">Cliente:</span> ${reclamo?.cliente || "N/A"}
+          </div>
+          <p style="margin-top: 20px;">Gracias por comunicarte con nosotros.</p>
+        </div>
+        <div class="footer">
+          <p>Este es un correo automático. Por favor no responder.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+/**
  * Genera el HTML para notificación de nuevo reclamo
  */
 const generarEmailNuevoReclamo = (reclamo, encargado) => {
+  const fechaCreacion = reclamo?.fecha_creacion
+    ? new Date(reclamo.fecha_creacion)
+    : null;
+  const fechaCreacionTexto =
+    fechaCreacion && !Number.isNaN(fechaCreacion.getTime())
+      ? fechaCreacion.toLocaleDateString("es-ES")
+      : "N/A";
   return `
     <!DOCTYPE html>
     <html>
@@ -77,9 +132,9 @@ const generarEmailNuevoReclamo = (reclamo, encargado) => {
             }
           </div>
           <div class="detail">
-            <span class="label">Fecha de creación:</span> ${new Date(
-              reclamo.fecha_creacion
-            ).toLocaleDateString("es-ES")}
+            <span class="label">Fecha de creación:</span> ${
+              fechaCreacionTexto
+            }
           </div>
           
           <p style="margin-top: 20px;">Por favor, accede al sistema para revisar los detalles y registrar el primer contacto.</p>
@@ -100,7 +155,8 @@ const generarEmailCambioEstado = (
   reclamo,
   encargado,
   estadoNuevo,
-  observaciones = null
+  observaciones = null,
+  headerColor = "#2196F3"
 ) => {
   return `
     <!DOCTYPE html>
@@ -109,7 +165,7 @@ const generarEmailCambioEstado = (
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #2196F3; color: white; padding: 20px; text-align: center; }
+        .header { background-color: ${headerColor}; color: white; padding: 20px; text-align: center; }
         .content { background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
         .footer { text-align: center; padding: 10px; font-size: 12px; color: #666; }
         .detail { margin: 10px 0; }
@@ -224,4 +280,5 @@ export default {
   generarEmailNuevoReclamo,
   generarEmailCambioEstado,
   generarEmailRechazo,
+  generarEmailAprobacionCliente,
 };

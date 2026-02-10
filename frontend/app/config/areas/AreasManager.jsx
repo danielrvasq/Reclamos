@@ -92,6 +92,7 @@ function AreasManager({ onClose, onRefresh }) {
   };
 
   const remove = async (id) => {
+    if (!confirm("¿Eliminar esta área?")) return;
     try {
       const res = await authFetch(`${API_BASE}/area/${id}`, {
         method: "DELETE",

@@ -14,7 +14,8 @@ class EmailNotificationService {
   static async obtenerCorreosPrimerContacto(
     clasificacion_id,
     clase_id,
-    causa_id
+    causa_id,
+    persona_responsable_id = null
   ) {
     try {
       const matriz = await MatrizDireccionamientoModel.findByClasificacion(
@@ -27,9 +28,19 @@ class EmailNotificationService {
         return [];
       }
 
+      const primerContactosIds = matriz.primer_contacto_ids
+        .map((id) => parseInt(id, 10))
+        .filter((id) => Number.isInteger(id));
+
+      const idsFiltrados = persona_responsable_id
+        ? primerContactosIds.filter(
+            (id) => id === parseInt(persona_responsable_id, 10)
+          )
+        : primerContactosIds;
+
       const contactos = [];
 
-      for (const userId of matriz.primer_contacto_ids) {
+      for (const userId of idsFiltrados) {
         const usuario = await UsuariosModel.getUserById(userId);
         if (!usuario || !usuario.correo) {
           continue;
@@ -194,13 +205,15 @@ class EmailNotificationService {
     clasificacion_id,
     clase_id,
     causa_id,
+    persona_responsable_id,
     detallesReclamo
   ) {
     try {
       const correos = await this.obtenerCorreosPrimerContacto(
         clasificacion_id,
         clase_id,
-        causa_id
+        causa_id,
+        persona_responsable_id
       );
 
       this.logResumen("CREAR RECLAMO", correos, detallesReclamo);
@@ -366,6 +379,89 @@ class EmailNotificationService {
       }
     } catch (err) {
       console.error("❌ Error enviando notificación rechazo:", err.message);
+    }
+  }
+
+  /**
+   * Envía emails de notificación por reclamos próximos a vencer
+   */
+  static async enviarNotificacionProximoVencer(detallesReclamo) {
+    try {
+      const correosTratamiento = await this.obtenerCorreosTratamiento(
+        detallesReclamo.clasificacion_id,
+        detallesReclamo.clase_id,
+        detallesReclamo.causa_id
+      );
+      const correosLideres = await this.obtenerCorreosLideres();
+      const correos = [...correosTratamiento, ...correosLideres].filter(
+        (destinatario, index, self) =>
+          destinatario?.email &&
+          self.findIndex((item) => item.email === destinatario.email) === index
+      );
+
+      this.logResumen("PROXIMO A VENCER", correos, detallesReclamo);
+
+      if (correos.length === 0) return;
+
+      const observaciones =
+        detallesReclamo.dias_restantes !== null &&
+        detallesReclamo.dias_restantes !== undefined
+          ? `Tienes un reclamo asignado proximo a vencer. Quedan ${detallesReclamo.dias_restantes} dias para la fecha limite.`
+          : "Tienes un reclamo asignado proximo a vencer.";
+
+      for (const destinatario of correos) {
+        const html = emailService.generarEmailCambioEstado(
+          {
+            ...detallesReclamo,
+            nombre_cliente: detallesReclamo.cliente || "N/A",
+          },
+          destinatario,
+          "Proximo a vencer",
+          observaciones,
+          "#f59e0b"
+        );
+        await emailService.sendEmail({
+          to: destinatario.email,
+          subject: `⚠️ Reclamo proximo a vencer - ID ${detallesReclamo.id}`,
+          html,
+        });
+      }
+    } catch (err) {
+      console.error(
+        "❌ Error enviando notificación proximo a vencer:",
+        err.message
+      );
+    }
+  }
+
+  /**
+   * Envía email al cliente con carta adjunta cuando se aprueba un reclamo
+   */
+  static async enviarNotificacionAprobacionCliente(
+    correoCliente,
+    detallesReclamo,
+    attachmentPath
+  ) {
+    try {
+      if (!correoCliente || !attachmentPath) return;
+
+      const html = emailService.generarEmailAprobacionCliente(detallesReclamo);
+      await emailService.sendEmail({
+        to: correoCliente,
+        subject: `✅ Reclamo Cerrado - ID ${detallesReclamo.id}`,
+        html,
+        attachments: [
+          {
+            filename: `carta_reclamo_${detallesReclamo.id}.docx`,
+            path: attachmentPath,
+          },
+        ],
+      });
+    } catch (err) {
+      console.error(
+        "❌ Error enviando notificación aprobación cliente:",
+        err.message
+      );
     }
   }
 }

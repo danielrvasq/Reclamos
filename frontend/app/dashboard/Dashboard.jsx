@@ -26,6 +26,7 @@ function Dashboard() {
   const [toastMessage, setToastMessage] = useState("");
   const [permittedRoutes, setPermittedRoutes] = useState([]);
   const [usuarioRol, setUsuarioRol] = useState(null);
+  const [usuarioNombre, setUsuarioNombre] = useState("");
 
   useEffect(() => {
     // Obtener rol del usuario y cargar permisos
@@ -34,7 +35,9 @@ function Dashboard() {
       try {
         const usuario = JSON.parse(usuarioJson);
         const rol = usuario.rol_nombre || usuario.rol;
+        const nombre = usuario.nombre || usuario.nombre_usuario || "";
         setUsuarioRol(rol);
+        setUsuarioNombre(nombre);
         setPermittedRoutes(getPermittedRoutes(rol));
       } catch (error) {
         console.error("Error al cargar permisos:", error);
@@ -61,7 +64,9 @@ function Dashboard() {
       <div className="dashboard-content">
         <div className="welcome-message">
           <h1>
-            <span>¡Bienvenido!</span>
+            <span>
+              ¡Bienvenido{usuarioNombre ? `, ${usuarioNombre}` : ""}!
+            </span>
             <span className="wave-emoji">
               <PiHandWaving />
             </span>

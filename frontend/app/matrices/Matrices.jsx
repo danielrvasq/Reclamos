@@ -18,6 +18,7 @@ function Matrices() {
   const [selectedMatrix, setSelectedMatrix] = useState(null);
   const [showMatrixForm, setShowMatrixForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -150,6 +151,33 @@ function Matrices() {
       .join(", ");
   };
 
+  const normalize = (value) => (value || "").toString().toLowerCase();
+  const matchesSearch = (matrix) => {
+    const term = normalize(searchTerm).trim();
+    if (!term) return true;
+    const values = [
+      getNombre(matrix.clasificacion_id, clasificaciones),
+      getNombre(matrix.clase_id, clases),
+      getNombre(matrix.causa_id, causas),
+      getUsuarioNombres(
+        matrix.primer_contacto_ids ||
+          (matrix.primer_contacto_id ? [matrix.primer_contacto_id] : []),
+        matrix.primer_contacto_nombres
+      ),
+      getUsuarioNombre(
+        matrix.responsable_tratamiento_id,
+        matrix.responsable_tratamiento_nombre
+      ),
+      matrix.tiempo_atencion_inicial_dias,
+      matrix.tiempo_respuesta_dias,
+      matrix.tipo_respuesta,
+      matrix.id,
+    ];
+    return values.some((value) => normalize(value).includes(term));
+  };
+
+  const filteredMatrices = matrices.filter(matchesSearch);
+
   return (
     <div className="matrices-page">
       <div className="matrices-header">
@@ -159,17 +187,25 @@ function Matrices() {
             Gestiona el enrutamiento único que utilizan todos los productos.
           </p>
         </div>
-        <button
-          type="button"
-          className="action primary"
-          onClick={() => {
-            setSelectedMatrix(null);
-            setShowMatrixForm(true);
-          }}
-        >
-          <Plus size={16} />
-          <span>Nueva Combinación</span>
-        </button>
+        <div className="matrices-tools">
+          <button
+            type="button"
+            className="action primary"
+            onClick={() => {
+              setSelectedMatrix(null);
+              setShowMatrixForm(true);
+            }}
+          >
+            <Plus size={16} />
+            <span>Nueva Combinación</span>
+          </button>
+          <input
+            className="search"
+            placeholder="Buscar..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       {loading && (
@@ -178,7 +214,7 @@ function Matrices() {
         </div>
       )}
 
-      {!loading && matrices.length === 0 && (
+      {!loading && filteredMatrices.length === 0 && (
         <div className="matrix-empty">
           <AlertCircle size={40} />
           <p>No hay combinaciones en la matriz aún.</p>
@@ -195,7 +231,7 @@ function Matrices() {
         </div>
       )}
 
-      {!loading && matrices.length > 0 && (
+      {!loading && filteredMatrices.length > 0 && (
         <div className="matrix-table-container">
           <table className="matrix-table">
             <thead>
@@ -212,7 +248,7 @@ function Matrices() {
               </tr>
             </thead>
             <tbody>
-              {matrices.map((matrix) => (
+              {filteredMatrices.map((matrix) => (
                 <tr key={matrix.id}>
                   <td>{getNombre(matrix.clasificacion_id, clasificaciones)}</td>
                   <td>{getNombre(matrix.clase_id, clases)}</td>

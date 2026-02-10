@@ -11,12 +11,17 @@ function SolucionModal({ reclamo, onClose, onFinish }) {
   const [formData, setFormData] = useState({
     solucion_final: "",
   });
+  const [archivoCarta, setArchivoCarta] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (reclamo) {
       setFormData({
         solucion_final: reclamo.solucion_final || "",
       });
+      setArchivoCarta(null);
+      setError("");
     }
   }, [reclamo]);
 
@@ -25,32 +30,60 @@ function SolucionModal({ reclamo, onClose, onFinish }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    if (!file) {
+      setArchivoCarta(null);
+      return;
+    }
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (ext !== "docx") {
+      setError("Solo se permiten archivos .docx");
+      e.target.value = "";
+      setArchivoCarta(null);
+      return;
+    }
+    setError("");
+    setArchivoCarta(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setError("");
+    if (!archivoCarta) {
+      setError("Debe adjuntar la carta en formato .docx");
+      return;
+    }
+    setLoading(true);
     try {
-      const payload = {
-        solucion_final: formData.solucion_final || null,
-      };
+      const payload = new FormData();
+      payload.append("solucion_final", formData.solucion_final || "");
+      if (archivoCarta) {
+        payload.append("carta", archivoCarta);
+      }
 
-      const res = await authFetch(`${API_BASE}/reclamos/${reclamo.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await authFetch(
+        `${API_BASE}/reclamos/${reclamo.id}/solucion-final`,
+        {
+          method: "POST",
+          body: payload,
+        }
+      );
 
       if (res.ok) {
         onFinish?.();
       } else {
         const error = await res.json();
-        alert(
+        setError(
           "Error al guardar la solución: " +
             (error.message || "Error desconocido")
         );
       }
     } catch (error) {
       console.error("Error al guardar solución:", error);
-      alert("Error al guardar la solución");
+      setError("Error al guardar la solución");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -97,6 +130,17 @@ function SolucionModal({ reclamo, onClose, onFinish }) {
                   required
                 />
               </label>
+              <label>
+                <span>Carta de respuesta (DOCX) *</span>
+                <input
+                  type="file"
+                  accept=".docx"
+                  onChange={handleFileChange}
+                />
+                <small className="file-hint">
+                  {archivoCarta ? archivoCarta.name : "Archivo obligatorio"}
+                </small>
+              </label>
             </div>
             <p className="info-text">
               La fecha de cierre definitiva se asignará automáticamente cuando
@@ -108,11 +152,12 @@ function SolucionModal({ reclamo, onClose, onFinish }) {
             <button type="button" className="btn-secondary" onClick={onClose}>
               Cancelar
             </button>
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="btn-primary" disabled={loading}>
               <CheckCircle size={16} />
-              Guardar Solución
+              {loading ? "Guardando..." : "Guardar Solución"}
             </button>
           </div>
+          {error && <div className="form-error">{error}</div>}
         </form>
       </div>
     </div>

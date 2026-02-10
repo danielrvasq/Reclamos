@@ -61,6 +61,7 @@ function InvoiceForm({
     clasificacion_id: "",
     clase_id: "",
     causa_id: "",
+    primer_contacto_id: "",
     observaciones_primer_contacto: "",
     avance_proceso_responsable: "",
     ccpa: "",
@@ -112,6 +113,7 @@ function InvoiceForm({
         clasificacion_id: initialData.clasificacion_id || "",
         clase_id: initialData.clase_id || "",
         causa_id: initialData.causa_id || "",
+        primer_contacto_id: initialData.persona_responsable || "",
         observaciones_primer_contacto:
           initialData.observaciones_primer_contacto || "",
         avance_proceso_responsable:
@@ -214,6 +216,33 @@ function InvoiceForm({
     );
   });
 
+  const selectedClasificacionId = parseInt(reclamoData.clasificacion_id, 10);
+  const selectedClaseId = parseInt(reclamoData.clase_id, 10);
+  const selectedCausaId = parseInt(reclamoData.causa_id, 10);
+
+  const matrizSeleccionada = matrizDireccionamiento.find(
+    (m) =>
+      m.clasificacion_id === selectedClasificacionId &&
+      m.clase_id === selectedClaseId &&
+      m.causa_id === selectedCausaId
+  );
+
+  const primerContactoIds = Array.isArray(
+    matrizSeleccionada?.primer_contacto_ids
+  )
+    ? matrizSeleccionada.primer_contacto_ids
+        .map((id) => parseInt(id, 10))
+        .filter((id) => Number.isInteger(id))
+    : matrizSeleccionada?.primer_contacto_id
+    ? [parseInt(matrizSeleccionada.primer_contacto_id, 10)].filter((id) =>
+        Number.isInteger(id)
+      )
+    : [];
+
+  const primerContactosDisponibles = usuarios.filter((u) =>
+    primerContactoIds.includes(parseInt(u.id, 10))
+  );
+
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
       if (currentStep === 2) {
@@ -311,6 +340,7 @@ function InvoiceForm({
         clasificacion_id: "",
         clase_id: "",
         causa_id: "",
+        primer_contacto_id: "",
       }));
     }
 
@@ -321,6 +351,7 @@ function InvoiceForm({
         ...prev,
         clase_id: "",
         causa_id: "",
+        primer_contacto_id: "",
       }));
     }
 
@@ -330,6 +361,7 @@ function InvoiceForm({
       setReclamoData((prev) => ({
         ...prev,
         causa_id: "",
+        primer_contacto_id: "",
       }));
     }
 
@@ -346,9 +378,38 @@ function InvoiceForm({
       );
       if (matriz) {
         setDesdeMatriz(matriz);
+        const ids = Array.isArray(matriz.primer_contacto_ids)
+          ? matriz.primer_contacto_ids
+              .map((id) => parseInt(id, 10))
+              .filter((id) => Number.isInteger(id))
+          : matriz.primer_contacto_id
+          ? [parseInt(matriz.primer_contacto_id, 10)].filter((id) =>
+              Number.isInteger(id)
+            )
+          : [];
+        setReclamoData((prev) => {
+          const prevSel = parseInt(prev.primer_contacto_id, 10);
+          const nextSel =
+            ids.length === 1
+              ? ids[0]
+              : ids.includes(prevSel)
+              ? prevSel
+              : "";
+          return {
+            ...prev,
+            causa_id: value,
+            primer_contacto_id: nextSel ? String(nextSel) : "",
+          };
+        });
       } else {
         resetTiempoYFecha();
+        setReclamoData((prev) => ({
+          ...prev,
+          causa_id: value,
+          primer_contacto_id: "",
+        }));
       }
+      return;
     }
 
     if (name === "proceso_responsable") {
@@ -415,6 +476,7 @@ function InvoiceForm({
         clasificacion_id: parseInt(reclamoData.clasificacion_id) || null,
         clase_id: parseInt(reclamoData.clase_id) || null,
         causa_id: parseInt(reclamoData.causa_id) || null,
+        primer_contacto_id: parseInt(reclamoData.primer_contacto_id) || null,
         observaciones_primer_contacto:
           reclamoData.observaciones_primer_contacto || null,
         avance_proceso_responsable:
@@ -434,6 +496,11 @@ function InvoiceForm({
           body: JSON.stringify(payload),
         });
       } else {
+        if (primerContactoIds.length > 1 && !payload.primer_contacto_id) {
+          alert("Seleccione el responsable de primer contacto");
+          setIsSubmitting(false);
+          return;
+        }
         // Crear
         res = await authFetch(`${API_BASE}/reclamos`, {
           method: "POST",
@@ -608,6 +675,33 @@ function InvoiceForm({
                       {filteredCausas.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="primer_contacto_id">
+                      Responsable primer contacto
+                    </label>
+                    <select
+                      id="primer_contacto_id"
+                      name="primer_contacto_id"
+                      value={reclamoData.primer_contacto_id}
+                      onChange={handleFieldChange}
+                      disabled={
+                        isViewOnly ||
+                        !reclamoData.causa_id ||
+                        primerContactosDisponibles.length === 0
+                      }
+                    >
+                      <option value="">
+                        {primerContactosDisponibles.length > 1
+                          ? "Seleccione"
+                          : "Sin opciones"}
+                      </option>
+                      {primerContactosDisponibles.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.nombre}
                         </option>
                       ))}
                     </select>

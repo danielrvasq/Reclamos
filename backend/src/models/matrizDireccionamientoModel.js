@@ -333,10 +333,25 @@ class MatrizDireccionamientoModel {
   static async delete(id) {
     try {
       const pool = await poolPromise;
-      await pool
-        .request()
-        .input("id", sql.Int, id)
-        .query("DELETE FROM matriz_direccionamiento WHERE id = @id");
+      const transaction = new sql.Transaction(pool);
+      await transaction.begin();
+
+      try {
+        await new sql.Request(transaction)
+          .input("id", sql.Int, id)
+          .query(
+            "DELETE FROM matriz_direccionamiento_primer_contacto WHERE matriz_direccionamiento_id = @id"
+          );
+
+        await new sql.Request(transaction)
+          .input("id", sql.Int, id)
+          .query("DELETE FROM matriz_direccionamiento WHERE id = @id");
+
+        await transaction.commit();
+      } catch (err) {
+        await transaction.rollback();
+        throw err;
+      }
       return { message: "Matriz direccionamiento eliminada correctamente" };
     } catch (err) {
       throw new Error(

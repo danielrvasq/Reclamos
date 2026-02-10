@@ -150,6 +150,7 @@
 .form-fields input[type="text"],
 .form-fields input[type="number"],
 .form-fields input[type="date"],
+.form-fields input[type="file"],
 .form-fields textarea {
   border: 1px solid #d1d1d1;
   border-radius: 8px;
@@ -157,6 +158,21 @@
   font-size: 14px;
   font-family: inherit;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.file-hint {
+  font-size: 12px;
+  color: #666666;
+}
+
+.form-error {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fee;
+  border: 1px solid #f99;
+  color: #c33;
+  font-size: 13px;
 }
 
 .form-fields textarea {

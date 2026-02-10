@@ -141,3 +141,76 @@
   color: #c33;
   font-size: 13px;
 }
+
+.attachment-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d0d0d0;
+  background: #ffffff;
+  color: #1f2937;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.attachment-link:hover {
+  background: #f8f8f8;
+  border-color: #bdbdbd;
+}
+
+.carta-preview {
+  width: 100%;
+  height: 420px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.reclamo-detalle-modal {
+  width: min(920px, 100%);
+}
+
+.reclamo-detalle-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.reclamo-detalle-section h4 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.reclamo-detalle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px 18px;
+}
+
+.reclamo-detalle-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.reclamo-detalle-label {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.reclamo-detalle-value {
+  font-size: 13px;
+  color: #1f2937;
+  white-space: pre-wrap;
+}

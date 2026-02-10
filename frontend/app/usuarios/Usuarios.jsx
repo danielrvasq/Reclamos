@@ -17,6 +17,7 @@ function Usuarios() {
   const [editingUser, setEditingUser] = useState(null);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("es-CO") : "—");
   const fmtTs = (d) => (d ? new Date(d).toLocaleString("es-CO") : "—");
@@ -140,9 +141,26 @@ function Usuarios() {
     fetchUsers();
   }, [fetchUsers]);
 
+  const normalize = (value) => (value || "").toString().toLowerCase();
+  const matchesSearch = (user) => {
+    const term = normalize(searchTerm).trim();
+    if (!term) return true;
+    return [
+      user.nombre_completo,
+      user.usuario,
+      user.email,
+      user.rol,
+      getAreaNombre(user.area_id),
+    ].some((field) => normalize(field).includes(term));
+  };
+
   // Separar usuarios activos e inactivos
-  const activos = users.filter((u) => u.estado === "activo");
-  const inactivos = users.filter((u) => u.estado === "inactivo");
+  const activos = users.filter(
+    (u) => u.estado === "activo" && matchesSearch(u)
+  );
+  const inactivos = users.filter(
+    (u) => u.estado === "inactivo" && matchesSearch(u)
+  );
 
   const syncUserRole = async (userId, roleId) => {
     if (!roleId || !userId) return;
@@ -284,7 +302,12 @@ function Usuarios() {
             <RotateCcw size={16} />
             <span>Refrescar</span>
           </button>
-          <input className="search" placeholder="Buscar…" disabled />
+          <input
+            className="search"
+            placeholder="Buscar…"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 

@@ -15,8 +15,9 @@ class FormulariosModel {
                 descripcion_caso, calificacion, justificado, incertidumbre,
                 no_justificado, clasificacion_id, clase_id, causa_id,
                 observaciones_primer_contacto, avance_proceso_responsable,
-                  ccpa, solucion_final, dias_habiles_demora,
-            fecha_cierre_definitiva, observaciones, creado_por, activo, created_at
+            ccpa, solucion_final, dias_habiles_demora,
+          fecha_cierre_definitiva, observaciones, creado_por, activo, created_at,
+          carta_adjunta_path
          FROM reclamos
          WHERE activo = 1
          ORDER BY id DESC`
@@ -34,6 +35,34 @@ class FormulariosModel {
         .request()
         .input("id", sql.Int, id)
         .query(
+            `SELECT id, producto_id, estado_id, asesor, fecha_creacion,
+                  tiempo_respuesta, fecha_limite_teorico,
+                  diferencia, cumplimiento, proceso_responsable, persona_responsable,
+                  cliente, departamento, ciudad, nombre_contacto, cargo,
+                  telefono, celular, correo_electronico, producto,
+                  no_pedido, no_remision, fecha_despacho, via_ingreso,
+                  descripcion_caso, calificacion, justificado, incertidumbre,
+                  no_justificado, clasificacion_id, clase_id, causa_id,
+                  observaciones_primer_contacto, avance_proceso_responsable,
+                  ccpa, solucion_final, dias_habiles_demora,
+                fecha_cierre_definitiva, observaciones, creado_por, activo, created_at,
+                carta_adjunta_path
+           FROM reclamos
+           WHERE id = @id`
+        );
+      return result.recordset[0] || null;
+    } catch (err) {
+      throw new Error(`Error al obtener reclamo: ${err.message}`);
+    }
+  }
+
+  static async getProximosVencer(dias = 2) {
+    try {
+      const pool = await poolPromise;
+      const result = await pool
+        .request()
+        .input("dias", sql.Int, dias)
+        .query(
           `SELECT id, producto_id, estado_id, asesor, fecha_creacion,
                   tiempo_respuesta, fecha_limite_teorico,
                   diferencia, cumplimiento, proceso_responsable, persona_responsable,
@@ -43,14 +72,19 @@ class FormulariosModel {
                   descripcion_caso, calificacion, justificado, incertidumbre,
                   no_justificado, clasificacion_id, clase_id, causa_id,
                   observaciones_primer_contacto, avance_proceso_responsable,
-                      ccpa, solucion_final, dias_habiles_demora,
-                  fecha_cierre_definitiva, observaciones, creado_por, activo, created_at
+                  ccpa, solucion_final, dias_habiles_demora,
+                  fecha_cierre_definitiva, observaciones, creado_por, activo, created_at,
+                  DATEDIFF(day, CAST(GETDATE() as date), fecha_limite_teorico) AS dias_restantes
            FROM reclamos
-           WHERE id = @id`
+           WHERE activo = 1
+             AND fecha_limite_teorico IS NOT NULL
+             AND fecha_cierre_definitiva IS NULL
+             AND DATEDIFF(day, CAST(GETDATE() as date), fecha_limite_teorico) BETWEEN 0 AND @dias
+           ORDER BY fecha_limite_teorico ASC, id DESC`
         );
-      return result.recordset[0] || null;
+      return result.recordset;
     } catch (err) {
-      throw new Error(`Error al obtener reclamo: ${err.message}`);
+      throw new Error(`Error al obtener reclamos proximos a vencer: ${err.message}`);
     }
   }
 
@@ -423,6 +457,15 @@ class FormulariosModel {
             }
           }
         }
+      }
+
+      if (data.hasOwnProperty("carta_adjunta_path")) {
+        setClauses.push("carta_adjunta_path = @cartaAdjuntaPath");
+        request.input(
+          "cartaAdjuntaPath",
+          sql.NVarChar(500),
+          data.carta_adjunta_path || null
+        );
       }
 
       if (setClauses.length === 0) {

@@ -2,6 +2,13 @@ import FormulariosModel from "../models/formulariosModel.js";
 import MatrizDireccionamientoModel from "../models/matrizDireccionamientoModel.js";
 import RegistrosModel from "../models/registrosModel.js";
 import EmailNotificationService from "../services/emailNotificationService.js";
+import path from "path";
+import fs from "fs";
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class FormulariosController {
   static async registrarAccion({
@@ -46,6 +53,48 @@ class FormulariosController {
     }
   }
 
+  static async getProximosVencer(req, res) {
+    try {
+      const dias = req.query?.dias ? parseInt(req.query.dias, 10) : 2;
+      const items = await FormulariosModel.getProximosVencer(
+        Number.isNaN(dias) ? 2 : dias
+      );
+      res.json({ status: "success", data: items });
+    } catch (err) {
+      res.status(500).json({ status: "error", message: err.message });
+    }
+  }
+
+  static async notificarProximosVencer(req, res) {
+    try {
+      const dias = req.body?.dias ? parseInt(req.body.dias, 10) : 2;
+      const items = await FormulariosModel.getProximosVencer(
+        Number.isNaN(dias) ? 2 : dias
+      );
+
+      for (const reclamo of items) {
+        await EmailNotificationService.enviarNotificacionProximoVencer({
+          id: reclamo.id,
+          producto: reclamo.producto || "N/A",
+          cliente: reclamo.cliente || "N/A",
+          clasificacion_id: reclamo.clasificacion_id,
+          clase_id: reclamo.clase_id,
+          causa_id: reclamo.causa_id,
+          dias_restantes: reclamo.dias_restantes,
+          fecha_limite_teorico: reclamo.fecha_limite_teorico,
+        });
+      }
+
+      res.json({
+        status: "success",
+        message: "Notificaciones enviadas",
+        count: items.length,
+      });
+    } catch (err) {
+      res.status(500).json({ status: "error", message: err.message });
+    }
+  }
+
   static async create(req, res) {
     try {
       const body = req.body;
@@ -65,6 +114,9 @@ class FormulariosController {
       let proceso_responsable = body.proceso_responsable
         ? parseInt(body.proceso_responsable)
         : null;
+      let primer_contacto_id = body.primer_contacto_id
+        ? parseInt(body.primer_contacto_id, 10)
+        : null;
 
       if (body.clasificacion_id && body.clase_id && body.causa_id) {
         const matriz = await MatrizDireccionamientoModel.findByClasificacion(
@@ -76,7 +128,34 @@ class FormulariosController {
         if (matriz) {
           // Asignar primer_contacto_id como persona_responsable para estado Primer contacto (6)
           if (matriz.primer_contacto_ids?.length) {
-            persona_responsable = matriz.primer_contacto_ids[0];
+            const primerContactosIds = matriz.primer_contacto_ids
+              .map((id) => parseInt(id, 10))
+              .filter((id) => Number.isInteger(id));
+
+            if (
+              primer_contacto_id &&
+              !primerContactosIds.includes(primer_contacto_id)
+            ) {
+              return res.status(400).json({
+                status: "error",
+                message:
+                  "primer_contacto_id no pertenece a los responsables de la matriz",
+              });
+            }
+
+            if (
+              primer_contacto_id &&
+              primerContactosIds.includes(primer_contacto_id)
+            ) {
+              persona_responsable = primer_contacto_id;
+            } else if (
+              persona_responsable &&
+              primerContactosIds.includes(persona_responsable)
+            ) {
+              persona_responsable = persona_responsable;
+            } else {
+              persona_responsable = primerContactosIds[0] || null;
+            }
           }
         }
       }
@@ -151,11 +230,14 @@ class FormulariosController {
           body.clasificacion_id,
           body.clase_id,
           body.causa_id,
+          persona_responsable,
           {
             id: newItem?.id,
             producto: body.producto || "N/A",
             cliente: body.cliente || "N/A",
             nombre_cliente: body.cliente || "N/A",
+            fecha_creacion:
+              newItem?.fecha_creacion || body.fecha_creacion || new Date(),
           }
         );
       }
@@ -372,6 +454,173 @@ class FormulariosController {
     }
   }
 
+  static async registrarSolucionFinalConAdjunto(req, res) {
+    try {
+      const { id } = req.params;
+      const { solucion_final } = req.body || {};
+
+      if (!solucion_final || !solucion_final.trim()) {
+        return res.status(400).json({
+          status: "error",
+          message: "La solucion final es requerida",
+        });
+      }
+
+      const exists = await FormulariosModel.getById(id);
+      if (!exists) {
+        return res
+          .status(404)
+          .json({ status: "error", message: "Formulario no encontrado" });
+      }
+
+      const roles = req.usuario?.roles || [];
+      const esAdminOLider =
+        roles.includes("administrador") || roles.includes("lider Reclamos");
+      const esResponsableTratamiento =
+        parseInt(exists.persona_responsable, 10) ===
+        parseInt(req.usuario?.id, 10);
+
+      if (!esAdminOLider && !esResponsableTratamiento) {
+        return res.status(403).json({
+          status: "error",
+          message:
+            "No tienes permisos para registrar la solucion final de este reclamo",
+        });
+      }
+
+      const updateData = {
+        solucion_final: solucion_final.trim(),
+      };
+
+      if (!req.file?.path) {
+        return res.status(400).json({
+          status: "error",
+          message: "Debe adjuntar la carta en formato .docx",
+        });
+      }
+
+      updateData.carta_adjunta_path = req.file.path;
+
+      const updated = await FormulariosModel.updatePartial(id, updateData);
+
+      await FormulariosController.registrarAccion({
+        formularioId: id,
+        usuarioId: req.usuario?.id || null,
+        accion: "TRATAMIENTO",
+        observacion: solucion_final.trim() || "Solucion final registrada",
+      });
+
+      if (updated) {
+        await EmailNotificationService.enviarNotificacionSolucionFinal({
+          id: updated.id,
+          producto: updated.producto || "N/A",
+          cliente: updated.cliente || "N/A",
+          nombre_cliente: updated.cliente || "N/A",
+        });
+      }
+
+      return res.status(200).json({
+        status: "success",
+        message: "Solucion final registrada",
+        data: updated,
+      });
+    } catch (err) {
+      res.status(500).json({ status: "error", message: err.message });
+    }
+  }
+
+  static async getCartaPreview(req, res) {
+    try {
+      const { id } = req.params;
+      const reclamo = await FormulariosModel.getById(id);
+
+      if (!reclamo?.carta_adjunta_path) {
+        return res.status(404).json({
+          status: "error",
+          message: "No hay carta adjunta para este reclamo",
+        });
+      }
+
+      const cartaPath = path.isAbsolute(reclamo.carta_adjunta_path)
+        ? reclamo.carta_adjunta_path
+        : path.join(__dirname, "..", reclamo.carta_adjunta_path);
+
+      if (!fs.existsSync(cartaPath)) {
+        return res.status(404).json({
+          status: "error",
+          message: "No se encontro la carta adjunta",
+        });
+      }
+
+      const pdfDir = path.join(path.dirname(cartaPath), "previews");
+      const pdfName = `${path.basename(cartaPath, path.extname(cartaPath))}.pdf`;
+      const pdfPath = path.join(pdfDir, pdfName);
+
+      if (!fs.existsSync(pdfDir)) {
+        fs.mkdirSync(pdfDir, { recursive: true });
+      }
+
+      const sourceStat = fs.statSync(cartaPath);
+      const pdfExists = fs.existsSync(pdfPath);
+
+      if (!pdfExists || fs.statSync(pdfPath).mtimeMs < sourceStat.mtimeMs) {
+        await new Promise((resolve, reject) => {
+          const sofficePath = process.env.SOFFICE_PATH || "soffice";
+          const sofficeProcess = spawn(sofficePath, [
+            "--headless",
+            "--convert-to",
+            "pdf",
+            "--outdir",
+            pdfDir,
+            cartaPath,
+          ]);
+
+          sofficeProcess.on("error", reject);
+          sofficeProcess.on("exit", (code) => {
+            if (code === 0) {
+              resolve();
+            } else {
+              reject(new Error("No se pudo convertir la carta a PDF"));
+            }
+          });
+        });
+      }
+
+      return res.sendFile(pdfPath);
+    } catch (err) {
+      res.status(500).json({ status: "error", message: err.message });
+    }
+  }
+
+  static async descargarCarta(req, res) {
+    try {
+      const { id } = req.params;
+      const reclamo = await FormulariosModel.getById(id);
+
+      if (!reclamo?.carta_adjunta_path) {
+        return res.status(404).json({
+          status: "error",
+          message: "No hay carta adjunta para este reclamo",
+        });
+      }
+
+      const cartaPath = path.isAbsolute(reclamo.carta_adjunta_path)
+        ? reclamo.carta_adjunta_path
+        : path.join(__dirname, "..", reclamo.carta_adjunta_path);
+
+      if (!fs.existsSync(cartaPath)) {
+        return res.status(404).json({
+          status: "error",
+          message: "No se encontro la carta adjunta",
+        });
+      }
+
+      return res.sendFile(cartaPath);
+    } catch (err) {
+      res.status(500).json({ status: "error", message: err.message });
+    }
+  }
+
   static async delete(req, res) {
     try {
       const { id } = req.params;
@@ -393,6 +642,13 @@ class FormulariosController {
       const { id } = req.params;
       const reclamo = await FormulariosModel.getById(id);
 
+      if (!reclamo?.carta_adjunta_path) {
+        return res.status(400).json({
+          status: "error",
+          message: "No se puede aprobar sin carta adjunta",
+        });
+      }
+
       const updated = await FormulariosModel.aprobarReclamo(id);
 
       await FormulariosController.registrarAccion({
@@ -402,7 +658,7 @@ class FormulariosController {
         observacion: "Reclamo aprobado y cerrado",
       });
 
-      // Enviar notificación de email de aprobación
+      // Enviar notificación de email de aprobación al responsable
       if (reclamo && reclamo.persona_responsable) {
         await EmailNotificationService.enviarNotificacionAprobacion(
           reclamo.persona_responsable,
@@ -415,9 +671,25 @@ class FormulariosController {
         );
       }
 
+      let warning = null;
+      if (!reclamo?.correo_electronico) {
+        warning = "No se envio correo al cliente: falta correo electronico";
+      } else {
+        await EmailNotificationService.enviarNotificacionAprobacionCliente(
+          reclamo.correo_electronico,
+          {
+            id: reclamo.id,
+            producto: reclamo.producto || "N/A",
+            cliente: reclamo.cliente || "N/A",
+          },
+          reclamo.carta_adjunta_path
+        );
+      }
+
       res.json({
         status: "success",
         message: "Reclamo aprobado y cerrado",
+        warning,
         data: updated,
       });
     } catch (err) {

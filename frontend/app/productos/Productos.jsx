@@ -18,6 +18,7 @@ function Productos() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -69,8 +70,20 @@ function Productos() {
     return tipo ? tipo.nombre : "Sin tipo";
   };
 
-  const activos = products.filter((p) => p.activo);
-  const inactivos = products.filter((p) => !p.activo);
+  const normalize = (value) => (value || "").toString().toLowerCase();
+  const matchesSearch = (product) => {
+    const term = normalize(searchTerm).trim();
+    if (!term) return true;
+    return [
+      product.codigo,
+      product.nombre,
+      product.descripcion,
+      getTipoNombre(product.tipo_producto_id),
+    ].some((field) => normalize(field).includes(term));
+  };
+
+  const activos = products.filter((p) => p.activo && matchesSearch(p));
+  const inactivos = products.filter((p) => !p.activo && matchesSearch(p));
 
   const showToast = (message) => {
     setToastMessage(message);
@@ -188,7 +201,12 @@ function Productos() {
             <Plus size={16} />
             <span>Gestionar tipos</span>
           </button>
-          <input className="search" placeholder="Buscar…" disabled />
+          <input
+            className="search"
+            placeholder="Buscar…"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 

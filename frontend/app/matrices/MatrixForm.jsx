@@ -137,21 +137,6 @@ function MatrixForm({
     }));
   };
 
-  // Mantener sincronía de campos derivados
-  useEffect(() => {
-    // Si cambia clasificación, limpiar clase y causa
-    // (ya se hace en onChange, pero este efecto asegura consistencia cuando initialData cambia)
-    setFormData((prev) => ({
-      ...prev,
-      clase_id:
-        prev.clasificacion_id !== formData.clasificacion_id
-          ? ""
-          : prev.clase_id,
-      causa_id: prev.clase_id !== formData.clase_id ? "" : prev.causa_id,
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.clasificacion_id, formData.clase_id]);
-
   const handleCheckbox = (e) => {
     const { name, checked } = e.target;
     setFormData((prev) => ({ ...prev, [name]: checked }));

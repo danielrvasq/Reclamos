@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
+import path from "path";
+import { fileURLToPath } from "url";
 import { sql, poolPromise } from "./config/server.js";
 import authRoutes from "./routes/authRoutes.js";
 import rolesRoutes from "./routes/rolesRoutes.js";
@@ -23,11 +25,15 @@ import authMiddleware from "./middleware/authMiddleware.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadsDir = path.join(__dirname, "..", "uploads");
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use("/uploads", express.static(uploadsDir));
 
 // Ruta de prueba - Health check
 app.get("/api/health", (req, res) => {
@@ -78,6 +84,8 @@ app.use("/api/clases-matriz", clasesMatrizRoutes);
 app.use("/api/causas-matriz", causasMatrizRoutes);
 
 // Iniciar servidor
-app.listen(PORT, () => {});
+app.listen(PORT, () => {
+  console.log(`Servidor backend escuchando en puerto ${PORT}`);
+});
 
 export default app;

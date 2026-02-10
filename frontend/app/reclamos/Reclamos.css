@@ -22,7 +22,7 @@
   gap: 10px;
 }
 
-.reclamos-actions .action.primary {
+.reclamos-actions .action.primary, .action {
   background: #ff6600;
   color: #ffffff;
   border: none;
@@ -35,8 +35,23 @@
   gap: 8px;
 }
 
-.reclamos-actions .action.primary:hover {
+.reclamos-actions .action.primary:hover, .action:hover {
   background: var(--azul-corp);
+}
+
+.loading-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .reclamos-actions .action.primary:active {
@@ -92,12 +107,20 @@
 
 .reclamos-filters {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-bottom: 12px;
   padding: 12px 16px;
   background: #f9f9f9;
   border-bottom: 1px solid #e5e5e5;
   animation: slideDown 0.3s ease;
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
 }
 
 @keyframes slideDown {
@@ -120,6 +143,11 @@
   font-size: 13px;
   color: #4a4a4a;
   background: #fff;
+}
+
+.filter-select {
+  flex: 1;
+  min-width: 200px;
 }
 
 .filter-input:focus {
